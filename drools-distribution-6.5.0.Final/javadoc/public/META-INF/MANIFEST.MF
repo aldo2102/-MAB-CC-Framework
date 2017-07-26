@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Implementation-Title: KIE :: Public API
+Implementation-Version: 6.5.0.Final
+Archiver-Version: Plexus Archiver
+Java-Version: 1.8.0_92
+Built-By: jenkins
+Scm-Connection: scm:git:git@github.com:droolsjbpm/droolsjbpm-knowledge
+ .git/kie-api
+Specification-Vendor: JBoss by Red Hat
+Os-Arch: amd64
+Specification-Title: KIE :: Public API
+Implementation-Vendor-Id: org.kie
+Java-Vendor: Oracle Corporation
+Os-Name: Linux
+Scm-Url: https://github.com/droolsjbpm/droolsjbpm-knowledge/kie-api
+Implementation-Vendor: JBoss by Red Hat
+Os-Version: 2.6.32-504.23.4.el6.x86_64
+Scm-Revision: 563820aa4d66d26d91237bdaa4209632d0d94962
+Created-By: Apache Maven 3.2.3
+Build-Jdk: 1.8.0_92
+Specification-Version: 6.5.0.Final
+Implementation-URL: http://www.jboss.org/drools/kie-parent-with-depend
+ encies/kie-api-parent/kie-api
+

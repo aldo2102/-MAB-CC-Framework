@@ -1,0 +1,97 @@
+package com.sample.rules
+ 
+import models.DadosMonitorados;
+import models.ModelsConfigMachines;
+import models.ConfCurrentMachine;
+import models.ModelsProvisioning;
+import models.ModelsMonitoringForRules;
+import Starter.Starter;
+
+ 
+rule "Menos de 30 Agentes"
+	when
+        m: ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() &&  
+        m.getCpuNoUsed() <= ModelsProvisioning.getCpuNoUsedAvg() &&
+        m.getCpuUSED() >= m.getCpuMax()*0.75 &&
+        Starter.transformationAgentQty <= 30 &&
+        m.getTime()<=ModelsProvisioning.getTimeSelected())
+    then
+    	System.out.println( "Drools regra 1");
+    	Starter.model.setTimeSelected(m.getTime());
+    	Starter.model.setTimesCandidates(m.getTime());
+		Starter.model.setCpuUsedSelected(m.getCpuUSED());
+		Starter.model.setCpusCandidates(m.getCpu());
+			
+        
+end
+
+rule "Mais de 30 Agentes"
+	when
+         m : ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() &&  
+        m.getCpuUSED() >= ModelsProvisioning.getCpuMax()*0.635 &&
+        Starter.transformationAgentQty>30 && 
+        Starter.transformationAgentQty<=70 &&
+        m.getTime()<=ModelsProvisioning.getTimeSelected() )
+    
+    then
+    	System.out.println( "Drools regra 2");
+		Starter.model.setTimeSelected(m.getTime());
+    	Starter.model.setTimesCandidates(m.getTime());
+		Starter.model.setCpuUsedSelected(m.getCpuUSED());
+		Starter.model.setCpusCandidates(m.getCpu());
+		System.out.println(m.getCpu()+" "+Starter.model.getTimeSelected()+" "+ Starter.model.getCpuUsedSelected());
+end
+
+rule "Mais de 70 Agentes"
+	when
+        m: ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() &&  
+        m.getCpuNoUsed() <= ModelsProvisioning.getCpuNoUsedAvg() &&
+        m.getCpuUSED() >= ModelsProvisioning.getCpuMax()*0.605 &&
+        Starter.transformationAgentQty>70 && Starter.transformationAgentQty<85 &&
+        m.getTime()<ModelsProvisioning.getTimeSelected())
+    
+    then
+    	System.out.println( "Drools regra 3");
+		Starter.model.setTimeSelected(m.getTime());
+    	Starter.model.setTimesCandidates(m.getTime());
+		Starter.model.setCpuUsedSelected(m.getCpuUSED());
+		Starter.model.setCpusCandidates(m.getCpu());
+end
+
+rule "Mais de 85 Agentes"
+	when
+       m: ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() && 
+        m.getCpuUSED() >= ModelsProvisioning.getCpuMax()*0.58 &&
+        Starter.transformationAgentQty>=85 &&
+        m.getTime()<ModelsProvisioning.getTimeSelected())
+    then
+    	System.out.println( "Drools regra 4");
+		Starter.model.setTimeSelected(m.getTime());
+    	Starter.model.setTimesCandidates(m.getTime());
+		Starter.model.setCpuUsedSelected(m.getCpuUSED());
+		Starter.model.setCpusCandidates(m.getCpu());
+		
+		System.out.println(ModelsProvisioning.getCpuAvg()+" "+m.getCpu()+" "+Starter.model.getTimeSelected()+" "+ Starter.model.getCpuUsedSelected());
+end
+
+/*
+rule "Actuation"
+	when
+        n : DadosMonitorados( n.controller == 10 )
+        
+    then
+    	//n.controller=0;
+        System.out.printf( "Acionamento de nova VM \n");
+end
+
+rule "Verfication"
+	when
+        DadosMonitorados(DadosMonitorados.getController() == 20 &&
+        DadosMonitorados.getAVGCPU() > 85.0 )
+        
+    then
+        System.out.printf( "Verificando se necessário a troca %d \n",DadosMonitorados.getController());
+        java.awt.Toolkit.getDefaultToolkit().beep();
+        DadosMonitorados.setController(11);
+end
+*/

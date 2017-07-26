@@ -1,0 +1,37 @@
+package com.sample.rules
+
+import models.DadosMonitorados;
+import models.ModelsConfigMachines;
+import models.ConfCurrentMachine;
+import models.ModelsProvisioning;
+import models.ModelsMonitoringForRules;
+import Starter.Starter;
+
+rule "Time for steps"
+
+    when
+     m:ModelsMonitoringForRules(ModelsProvisioning.getTimeSelected() <= ModelsMonitoringForRules.getTime()/1000 &&
+        ModelsMonitoringForRules.getSteps() <= ModelsMonitoringForRules.getTotalSteps()*0.5 && 
+        ModelsMonitoringForRules.getSteps() > 0&&
+        ModelsMonitoringForRules.getTime()/1000 < 0.5*600 //50% de 10 minutos
+        )
+        
+    then
+		System.out.println("Tempo extrapolado");
+
+end
+
+rule "Waste of calculation"
+
+    when
+     m:ModelsMonitoringForRules(ModelsMonitoringForRules.getCPUUsed() < 60 &&
+        ModelsMonitoringForRules.getSteps() <= ModelsMonitoringForRules.getTotalSteps()*0.6 && 
+        ModelsMonitoringForRules.getSteps() > ModelsMonitoringForRules.getTotalSteps()*0.1 && 
+        ModelsMonitoringForRules.getSteps() > 0 &&
+        ModelsMonitoringForRules.getTime()/1000 < 0.5*600 //50% de 10 minutos
+        )
+        
+    then
+		System.out.println("Está tendo desperdício");
+
+end
