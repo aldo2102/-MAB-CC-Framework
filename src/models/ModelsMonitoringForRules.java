@@ -4,6 +4,7 @@ public class ModelsMonitoringForRules {
 	
 	public static double time=0;
 	public static double CPUUsed=0;
+	public static double memoryUsed=0;
 	public static int steps=0;
 	public static int status=0;
 	public static int totalSteps=0;
@@ -19,6 +20,16 @@ public class ModelsMonitoringForRules {
 		setSteps(0);
 		setStatus(0);
 	}
+	
+	
+	public static double getMemoryUsed() {
+		return memoryUsed;
+	}
+
+	public static void setMemoryUsed(double memoryUsed) {
+		ModelsMonitoringForRules.memoryUsed = memoryUsed;
+	}
+
 	public static double getCPUUsed() {
 		return CPUUsed;
 	}

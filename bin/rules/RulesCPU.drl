@@ -7,78 +7,194 @@ import models.ModelsProvisioning;
 import models.ModelsMonitoringForRules;
 import Starter.Starter;
 
- 
+rule "Provisioning rule price"
+	when
+        m: ModelsProvisioning(ModelsProvisioning.getMemoryUSEDSelected() >= (m.getMemoryUSED()+(m.getMemoryUSED()*Starter.cpuUsageVariable)) ||
+        ModelsProvisioning.getPriceSelected() >= (m.getPrice()+(m.getPrice()*Starter.priceVariable)) ||
+			(ModelsProvisioning.getTimeSelected() >= (m.getTime()+(m.getTime()*Starter.timeVariable))) ||
+			 (ModelsProvisioning.getCpuUsedSelected() <= (m.getCpuUSED()+(m.getCpuUSED()*Starter.timeVariable)))
+        )
+    then
+    	ModelsProvisioning.setTimeSelected(m.getTime());
+    	ModelsProvisioning.setMemoryUSEDSelected(m.getMemoryUSED());
+    	ModelsProvisioning.setTimesCandidates(m.getTime());
+		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
+		
+		double val = ((m.getMemoryUSED()+(m.getMemoryUSED()*Starter.cpuUsageVariable))+(m.getCpuUSED()+(m.getCpuUSED()*Starter.cpuUsageVariable))+(m.getCpuUSED()+(m.getCpuUSED()*Starter.timeVariable))/(((m.getTime()-(m.getTime()*Starter.timeVariable))-(m.getPrice()*Starter.priceVariable))));
+				
+				val = Math.ceil(val * 1000) / 1000;
+				
+				
+		m.setBalance(Math.abs(val));
+		ModelsProvisioning.setPriceSelected(m.getPrice());
+		ModelsProvisioning.setCpusCandidates(m);
+		System.out.println( "Drools regra Balanco price "+m.getBalance()+" CPU "+m.getMemoryUSED());
+
+end
+
+/*
+
+rule "Provisioning rule time"
+	when
+        m: ModelsProvisioning(ModelsProvisioning.getTimeSelected() >= (m.getTime()+(m.getTime()*Starter.timeVariable)))
+    then
+    	ModelsProvisioning.setTimeSelected(m.getTime());
+    	ModelsProvisioning.setTimesCandidates(m.getTime());
+		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
+		
+		//System.out.println( "Drools regra Balanco time "
+		m.setBalance(Math.abs((m.getCpuUSED()+(m.getCpuUSED()*Starter.timeVariable))/((m.getTime()-(m.getTime()*Starter.timeVariable))-(m.getPrice()*Starter.priceVariable))));
+		ModelsProvisioning.setPriceSelected(m.getPrice());
+		
+    	System.out.println( "Drools regra Balanco time "+m.getBalance()+" CPU "+m.getCpu());
+		ModelsProvisioning.setPriceSelected(m.getPrice());
+		ModelsProvisioning.setCpusCandidates(m);
+
+end
+
+rule "Provisioning rule CPU Usage"
+	when
+        m: ModelsProvisioning(ModelsProvisioning.getCpuUsedSelected() <= (m.getCpuUSED()+(m.getCpuUSED()*Starter.timeVariable)))
+    then
+    	ModelsProvisioning.setTimeSelected(m.getTime());
+    	ModelsProvisioning.setTimesCandidates(m.getTime());
+		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
+		m.setBalance(Math.abs((m.getCpuUSED()+(m.getCpuUSED()*Starter.timeVariable))/((m.getTime()-(m.getTime()*Starter.timeVariable))-(m.getPrice()*Starter.priceVariable))));
+		ModelsProvisioning.setPriceSelected(m.getPrice());
+		ModelsProvisioning.setCpusCandidates(m);
+		
+    	System.out.println( "Drools regra Balanco cpu "+m.getBalance()+" CPU "+m.getCpu());
+end
+
+
+
+
+rule "Provisioning rule price"
+	when
+        m: ModelsProvisioning(Starter.priceVariable >= Starter.cpuUsageVariable &&
+        Starter.priceVariable >= Starter.timeVariable &&
+        (ModelsProvisioning.getPriceSelected() > (m.getPrice()-(m.getPrice()*Starter.priceVariable))) ||
+        (ModelsProvisioning.getPriceSelected() == m.getPrice() && 
+        ModelsProvisioning.getTimeSelected() >= m.getTime()))
+    then
+    	ModelsProvisioning.setTimeSelected(m.getTime());
+    	ModelsProvisioning.setTimesCandidates(m.getTime());
+		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
+		
+		m.setBalance(m.getCpuUSED()/(m.getTime()-((Starter.priceVariable<0?1:m.getPrice()*Starter.priceVariable))));
+		ModelsProvisioning.setPriceSelected(m.getPrice());
+		ModelsProvisioning.setCpusCandidates(m);
+		System.out.println("CPU  "+m.getCpu()+" Price "+m.getPrice()+" Balance "+m.getPriceSelected());
+
+end
+
+rule "Provisioning rule time"
+	when
+        m: ModelsProvisioning(Starter.timeVariable >= Starter.cpuUsageVariable &&
+        Starter.timeVariable >= Starter.priceVariable &&
+        ModelsProvisioning.getTimeSelected() >= (m.getTime()*(1+Starter.timeVariable)))
+    then
+    	ModelsProvisioning.setTimeSelected(m.getTime());
+    	ModelsProvisioning.setTimesCandidates(m.getTime());
+		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
+		
+		
+		m.setBalance(m.getCpuUSED()/((Starter.timeVariable*m.getTime())-m.getPrice()));
+		ModelsProvisioning.setPriceSelected(m.getPrice());
+		
+    	System.out.println( "Drools regra Balanco time "+m.getBalance()+" CPU "+m.getCpu());
+		ModelsProvisioning.setPriceSelected(m.getPrice());
+		ModelsProvisioning.setCpusCandidates(m);
+
+end
+
+rule "Provisioning rule CPU Usage"
+	when
+        m: ModelsProvisioning(ModelsProvisioning.getCpuUsedSelected() <= (m.getCpuUSED()*(1+Starter.timeVariable)) &&
+        (Starter.cpuUsageVariable >= Starter.timeVariable &&
+        Starter.cpuUsageVariable >= Starter.priceVariable ))
+    then
+    	ModelsProvisioning.setTimeSelected(m.getTime());
+    	ModelsProvisioning.setTimesCandidates(m.getTime());
+		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
+		m.setBalance((m.getCpuUSED()/Starter.cpuUsageVariable)/(m.getTime()-m.getPrice()));
+		ModelsProvisioning.setPriceSelected(m.getPrice());
+		ModelsProvisioning.setCpusCandidates(m);
+		
+    	System.out.println( "Drools regra Balanco cpu "+m.getBalance()+" CPU "+m.getCpu());
+end
+
 rule "Menos de 30 Agentes"
 	when
-        m: ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() &&  
+        m: ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() &&
         m.getCpuNoUsed() <= ModelsProvisioning.getCpuNoUsedAvg() &&
         m.getCpuUSED() >= m.getCpuMax()*0.75 &&
         Starter.transformationAgentQty <= 30 &&
         m.getTime()<=ModelsProvisioning.getTimeSelected())
     then
     	System.out.println( "Drools regra 1");
-    	Starter.model.setTimeSelected(m.getTime());
-    	Starter.model.setTimesCandidates(m.getTime());
-		Starter.model.setCpuUsedSelected(m.getCpuUSED());
-		Starter.model.setCpusCandidates(m.getCpu());
-			
-        
+    	ModelsProvisioning.setTimeSelected(m.getTime());
+    	ModelsProvisioning.setTimesCandidates(m.getTime());
+		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
+		ModelsProvisioning.setCpusCandidates(m.getCpu());
+
+
 end
 
 rule "Mais de 30 Agentes"
 	when
-         m : ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() &&  
+         m : ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() &&
         m.getCpuUSED() >= ModelsProvisioning.getCpuMax()*0.635 &&
-        Starter.transformationAgentQty>30 && 
+        Starter.transformationAgentQty>30 &&
         Starter.transformationAgentQty<=70 &&
         m.getTime()<=ModelsProvisioning.getTimeSelected() )
-    
+
     then
     	System.out.println( "Drools regra 2");
-		Starter.model.setTimeSelected(m.getTime());
-    	Starter.model.setTimesCandidates(m.getTime());
-		Starter.model.setCpuUsedSelected(m.getCpuUSED());
-		Starter.model.setCpusCandidates(m.getCpu());
-		System.out.println(m.getCpu()+" "+Starter.model.getTimeSelected()+" "+ Starter.model.getCpuUsedSelected());
+		ModelsProvisioning.setTimeSelected(m.getTime());
+    	ModelsProvisioning.setTimesCandidates(m.getTime());
+		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
+		ModelsProvisioning.setCpusCandidates(m.getCpu());
+		System.out.println(m.getCpu()+" "+ModelsProvisioning.getTimeSelected()+" "+ ModelsProvisioning.getCpuUsedSelected());
 end
 
 rule "Mais de 70 Agentes"
 	when
-        m: ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() &&  
+        m: ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() &&
         m.getCpuNoUsed() <= ModelsProvisioning.getCpuNoUsedAvg() &&
         m.getCpuUSED() >= ModelsProvisioning.getCpuMax()*0.605 &&
         Starter.transformationAgentQty>70 && Starter.transformationAgentQty<85 &&
         m.getTime()<ModelsProvisioning.getTimeSelected())
-    
+
     then
     	System.out.println( "Drools regra 3");
-		Starter.model.setTimeSelected(m.getTime());
-    	Starter.model.setTimesCandidates(m.getTime());
-		Starter.model.setCpuUsedSelected(m.getCpuUSED());
-		Starter.model.setCpusCandidates(m.getCpu());
+		ModelsProvisioning.setTimeSelected(m.getTime());
+    	ModelsProvisioning.setTimesCandidates(m.getTime());
+		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
+		ModelsProvisioning.setCpusCandidates(m.getCpu());
 end
 
 rule "Mais de 85 Agentes"
 	when
-       m: ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() && 
+       m: ModelsProvisioning( m.getCpuUSED() >= ModelsProvisioning.getCpuAvg() &&
         m.getCpuUSED() >= ModelsProvisioning.getCpuMax()*0.58 &&
         Starter.transformationAgentQty>=85 &&
         m.getTime()<ModelsProvisioning.getTimeSelected())
     then
     	System.out.println( "Drools regra 4");
-		Starter.model.setTimeSelected(m.getTime());
-    	Starter.model.setTimesCandidates(m.getTime());
-		Starter.model.setCpuUsedSelected(m.getCpuUSED());
-		Starter.model.setCpusCandidates(m.getCpu());
-		
-		System.out.println(ModelsProvisioning.getCpuAvg()+" "+m.getCpu()+" "+Starter.model.getTimeSelected()+" "+ Starter.model.getCpuUsedSelected());
+		ModelsProvisioning.setTimeSelected(m.getTime());
+    	ModelsProvisioning.setTimesCandidates(m.getTime());
+		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
+		ModelsProvisioning.setCpusCandidates(m.getCpu());
+
+		System.out.println(ModelsProvisioning.getCpuAvg()+" "+m.getCpu()+" "+ModelsProvisioning.getTimeSelected()+" "+ ModelsProvisioning.getCpuUsedSelected());
 end
 
-/*
+
 rule "Actuation"
 	when
         n : DadosMonitorados( n.controller == 10 )
-        
+
     then
     	//n.controller=0;
         System.out.printf( "Acionamento de nova VM \n");
@@ -88,7 +204,7 @@ rule "Verfication"
 	when
         DadosMonitorados(DadosMonitorados.getController() == 20 &&
         DadosMonitorados.getAVGCPU() > 85.0 )
-        
+
     then
         System.out.printf( "Verificando se necessário a troca %d \n",DadosMonitorados.getController());
         java.awt.Toolkit.getDefaultToolkit().beep();

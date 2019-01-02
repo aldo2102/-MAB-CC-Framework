@@ -8,6 +8,8 @@ public class ModelsProvisioning {
 	static double cpuAvg=0;
 	double time=0;
 	double cpuUSED=0;
+	double memoryUSED=0;
+	static double memoryUSEDSelected=0;
 	static double cpuUsedSelected=0;
 	int cpuSelected=0;
 	static double timeSelected=0;
@@ -19,9 +21,61 @@ public class ModelsProvisioning {
 	static double costbenefit =Double.MAX_VALUE;
 	static double R2Time =0;
 	static double R2CPU =0;
+	double Balance;
+	static double bestBalance;
+	double price=0;
+	static double priceSelected=0;
+	
 	
 
-	static ArrayList<Integer> cpusCandidates=new ArrayList<Integer>();
+	public static double getMemoryUSEDSelected() {
+		return memoryUSEDSelected;
+	}
+
+	public static void setMemoryUSEDSelected(double memoryUSEDSelected) {
+		ModelsProvisioning.memoryUSEDSelected = memoryUSEDSelected;
+	}
+
+	public double getMemoryUSED() {
+		return memoryUSED;
+	}
+
+	public void setMemoryUSED(double memoryUSED) {
+		this.memoryUSED = memoryUSED;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	public static double getPriceSelected() {
+		return priceSelected;
+	}
+
+	public static void setPriceSelected(double priceSelected) {
+		ModelsProvisioning.priceSelected = priceSelected;
+	}
+
+	public static double getBestBalance() {
+		return bestBalance;
+	}
+
+	public static void setBestBalance(double bestBalance) {
+		ModelsProvisioning.bestBalance = bestBalance;
+	}
+
+	public double getBalance() {
+		return Balance;
+	}
+
+	public void setBalance(double balance) {
+		Balance = balance;
+	}
+	static ArrayList<ModelsProvisioning> cpusCandidates=new ArrayList<ModelsProvisioning>();
 	static ArrayList<Double>timesCandidates=new ArrayList<Double>();
 	
 	public ModelsProvisioning(){}
@@ -72,15 +126,20 @@ public class ModelsProvisioning {
 	public static void setTimesCandidates(double timeSelected) {
 		ModelsProvisioning.timesCandidates.add(timeSelected);
 	}
-	public static int getCpusCandidates() {
+	public static int getCpusCandidatesSize() {
 		return cpusCandidates.size();
 	}
-	public static int getCpusCandidates(int i) {
+	public static ArrayList<ModelsProvisioning> getCpusCandidates() {
+		return cpusCandidates;
+	} 
+	public static ModelsProvisioning getCpusCandidates(int i) {
 		return cpusCandidates.get(i);
 	}
-	public static void setCpusCandidates(int cpuSelected) {
-		ModelsProvisioning.cpusCandidates.add(cpuSelected);
+	public static void setCpusCandidates(ModelsProvisioning cpuSelected) {
+		System.out.println(cpusCandidates.size());
+		cpusCandidates.add(cpuSelected);
 	}
+	
 	public int getCpu() {
 		return this.cpu;
 	}

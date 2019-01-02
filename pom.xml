@@ -20,12 +20,21 @@
   
   <dependencies>
   
+  <dependency>
+    <groupId>org.drools</groupId>
+    <artifactId>drools-compiler</artifactId>
+    <version>6.5.0.Final</version>
+</dependency>
+  
    <dependency>
             <groupId>org.kie</groupId>
             <artifactId>kie-api</artifactId>
-            <version>6.3.0.Final</version>
+            <version>6.5.0.Final</version>
         </dependency>
-  
+        
+
+
+
   <dependency>
     <groupId> org.apache.cassandra</groupId>
     <artifactId>cassandra-all</artifactId>

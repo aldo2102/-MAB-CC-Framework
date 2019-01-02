@@ -10,20 +10,25 @@ import Starter.Starter;
 rule "Executions below 10 minutes"
 
    when
-     m: Integer(Starter.model.getTimesCandidates(m)<=10)
+     m: Integer(ModelsProvisioning.getBestBalance() < Starter.model.getCpusCandidates(m.intValue()).getBalance() ||
+      (Starter.model.getTimeSelected()>=Starter.model.getCpusCandidates(m.intValue()).getTime()) &&
+      ModelsProvisioning.getBestBalance() == Starter.model.getCpusCandidates(m.intValue()).getBalance()
+      )
         
     then
-    	Starter.model.setTimeSelected(ModelsProvisioning.getTimesCandidates(m));
-    	Starter.model.setCpuSelected(ModelsProvisioning.getCpusCandidates(m));
-		Starter.model.setCpuUsedSelected(Starter.model.getCpuUsedSelected());
-		ModelsProvisioning.setCostbenefit(10/(ModelsProvisioning.getTimesCandidates(m)*ModelsProvisioning.getCpusCandidates(m)*Starter.prices.getCpuPrice()));
     	
-		ModelsProvisioning.setValue(ModelsProvisioning.getTimesCandidates(m)*ModelsProvisioning.getCpusCandidates(m)*Starter.prices.getCpuPrice());
+		Starter.model.setBestBalance(Starter.model.getCpusCandidates(m.intValue()).getBalance());
+    	Starter.model.setTimeSelected(Starter.model.getCpusCandidates(m.intValue()).getTime());
+    	Starter.model.setCpuSelected(Starter.model.getCpusCandidates(m.intValue()).getCpu());
+		Starter.model.setCpuUsedSelected(Starter.model.getCpusCandidates(m.intValue()).getCpuUSED());
+		
+		System.out.println("CPU  "+Starter.model.getCpusCandidates(m.intValue()).getCpu());
+		//ModelsProvisioning.setValue(ModelsProvisioning.getTimesCandidates(m)*ModelsProvisioning.getCpusCandidates(m)*Starter.prices.getCpuPrice());
     	
-        System.out.printf( "Menos de 10 Minutos - CPU Selected %d  | Time Selected %f | preço Selected %f \n",ModelsProvisioning.getCpusCandidates(m), ModelsProvisioning.getTimesCandidates(m), (ModelsProvisioning.getTimesCandidates(m)*ModelsProvisioning.getCpusCandidates(m)*Starter.prices.getCpuPrice()));
+        //System.out.printf( "Menos de 10 Minutos - CPU Selected %d  | Time Selected %f | pre�o Selected %f \n",ModelsProvisioning.getCpusCandidates(m), ModelsProvisioning.getTimesCandidates(m), (ModelsProvisioning.getTimesCandidates(m)*ModelsProvisioning.getCpusCandidates(m)*Starter.prices.getCpuPrice()));
 
 end
-
+/*
 rule "Execution above 10 minutes"
 
    when
@@ -40,3 +45,4 @@ rule "Execution above 10 minutes"
         System.out.printf( "Mais de 10 Minutos - CPU Selected %d  | Time Selected %f | preço Selected %f \n",ModelsProvisioning.getCpusCandidates(m), ModelsProvisioning.getTimesCandidates(m), (ModelsProvisioning.getTimesCandidates(m)*ModelsProvisioning.getCpusCandidates(m)*Starter.prices.getCpuPrice()));
 
 end
+*/

@@ -103,8 +103,8 @@ class Monitoring extends OneShotBehaviour {
 
 		try {
 			System.out.println("Monitoring");
-			String[] command = { "/bin/bash", "-c","gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-west1-b command 'dstat --integer  -cmnd --noheaders --output stats.csv'"};
-
+			String[] command = { "/bin/bash", "-c","gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-central1-c --command='dstat --integer  -cmnd --noheaders --output stats.csv'"};
+			System.out.println("gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-west1-b command 'dstat --integer  -cmnd --noheaders --output stats.csv'");
 			//System.out.println(command);
 			ProcessBuilder pb = new ProcessBuilder(command);
 			p = pb.start();
@@ -166,9 +166,17 @@ class Monitoring extends OneShotBehaviour {
 
 						DadosMonitorados.cont++;
 						DadosMonitorados.SUMCPU=DadosMonitorados.SUMCPU+date.getUsrC() + date.getSysC();
+						DadosMonitorados.SUMMemory=DadosMonitorados.SUMMemory+date.getUsedM();
 						DadosMonitorados.SUMCPUidl=DadosMonitorados.SUMCPUidl + date.getIdlC();
 						DadosMonitorados.AVGCPU=DadosMonitorados.SUMCPU/DadosMonitorados.cont;
 						DadosMonitorados.AVGCPUidl=DadosMonitorados.SUMCPUidl/DadosMonitorados.cont;
+						
+						//System.out.println("SOmatorio memoria "+DadosMonitorados.SUMMemory);
+						//System.out.println("Quantidade Memoria "+DadosMonitorados.cont);
+						
+						DadosMonitorados.AVGMemory=DadosMonitorados.SUMMemory/DadosMonitorados.cont;
+						
+						//System.out.println("Média Memoria "+DadosMonitorados.AVGMemory);
 						//System.out.printf( "JADE %f \n",date.getAVGCPU());
 						MonitoringAgents.dataList.add(date);
 						
@@ -187,8 +195,8 @@ class Monitoring extends OneShotBehaviour {
 						
 					}
 				}
+				
 			}
-
 
 		} catch (NumberFormatException | IOException e) {
 			// TODO Auto-generated catch block

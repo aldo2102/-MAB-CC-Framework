@@ -4,8 +4,10 @@ public class DadosMonitorados {
 	
 	public static int cont = 0;
 	public static double AVGCPU=0;
+	public static double AVGMemory=0;
 	public static double AVGCPUidl=0;
 	public static double SUMCPU=0;
+	public static double SUMMemory=0;
 	public static double SUMCPUidl=0;
 	
 	private double usrC=0;
@@ -26,6 +28,21 @@ public class DadosMonitorados {
 	private double readD=0;
 	private double writD=0;
 	
+	
+	
+	
+	public static double getSUMMemory() {
+		return SUMMemory;
+	}
+	public static void setSUMMemory(double sUMMemory) {
+		SUMMemory = sUMMemory;
+	}
+	public static double getAVGMemory() {
+		return AVGMemory;
+	}
+	public static void setAVGMemory(double aVGMemory) {
+		AVGMemory = aVGMemory;
+	}
 	public static double getAVGCPUidl() {
 		return AVGCPUidl;
 	}

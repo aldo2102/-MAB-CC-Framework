@@ -1,8 +1,14 @@
-package Starter;
-
+﻿package Starter;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -10,27 +16,50 @@ import java.nio.charset.Charset;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import models.ModelsConfigMachines;
 
 public class PriceGoogleCloud {
+	private final static String USER_AGENT = "Mozilla/5.0";
+	
+	private static String readAll(Reader rd) throws IOException {
+	    StringBuilder sb = new StringBuilder();
+	    int cp;
+	    while ((cp = rd.read()) != -1) {
+	      sb.append((char) cp);
+	    }
+	    return sb.toString();
+	  }
 
+	  public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+	    InputStream is = new URL(url).openStream();
+	    try {
+	      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+	      String jsonText = readAll(rd);
+	      JSONObject json = new JSONObject(jsonText);
+	      return json;
+	    } finally {
+	      is.close();
+	    }
+	  }
 
-  public static void prices() {
+  public static void prices() throws IOException {
 	  
-		String jsonString = callURL("http://cloudpricingcalculator.appspot.com/static/data/pricelist.json");
-		jsonString="[ "+jsonString+" ]";
+		
 		
 		
 		//System.out.println(jsonString);
 
 //Replace this try catch block for all below subsequent examples
 		try {  
-
-			JSONArray jsonArray = new JSONArray(jsonString);
-
-			JSONObject row = jsonArray.getJSONObject(0);
-			row = row.getJSONObject("gcp_price_list");
+			//JSONObject jsonString = readJsonFromUrl("https://cloudpricingcalculator.appspot.com/static/data/pricelist.json");
+			FileReader reader = new FileReader("pricelist.json");
+		    JSONTokener tokener = new JSONTokener(reader);
+		    JSONObject jsonString = new JSONObject(tokener);
+			
+			
+			JSONObject row = jsonString.getJSONObject("gcp_price_list");
 			
 			System.out.println(row.getJSONObject("CP-COMPUTEENGINE-CUSTOM-VM-CORE").toString());
 			System.out.println(row.getJSONObject("CP-COMPUTEENGINE-CUSTOM-VM-RAM").toString());
@@ -75,34 +104,5 @@ public class PriceGoogleCloud {
 		System.out.println("preço "+Starter.prices.getCpuPrice());
 	}
 
-	public static String callURL(String myURL) {
-		System.out.println("Requested URL:" + myURL);
-		StringBuilder sb = new StringBuilder();
-		URLConnection urlConn = null;
-		InputStreamReader in = null;
-		try {
-			URL url = new URL(myURL);
-			urlConn = url.openConnection();
-			if (urlConn != null)
-				urlConn.setReadTimeout(60 * 1000);
-			if (urlConn != null && urlConn.getInputStream() != null) {
-				in = new InputStreamReader(urlConn.getInputStream(),
-						Charset.defaultCharset());
-				BufferedReader bufferedReader = new BufferedReader(in);
-				if (bufferedReader != null) {
-					int cp;
-					while ((cp = bufferedReader.read()) != -1) {
-						sb.append((char) cp);
-					}
-					bufferedReader.close();
-				}
-			}
-		in.close();
-		} catch (Exception e) {
-			throw new RuntimeException("Exception while calling URL:"+ myURL, e);
-		} 
-
-		return sb.toString();
-	}
-
+	
 }

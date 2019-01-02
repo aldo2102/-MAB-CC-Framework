@@ -31,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -116,17 +117,20 @@ class StartAPP extends OneShotBehaviour {
 		try {
 			System.out.println("Executando MASE");
 
-			String[] command = { "/bin/bash", "-c","gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-west1-b command 'java -jar /home/antonio_paulino_mendes/Testes/MASEX.jar -MASEtransformationAgentQty="+Starter.Starter.transformationAgentQty+","+Starter.Starter.transformationAgentQty+"'"};
-			
+			String[] command = { "/bin/bash", "-c","gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-central1-c --command='"+Starter.Starter.command+"'"};
+			System.out.println("kkkkkkkkkkkk gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-central1-c --command='"+Starter.Starter.command+"'");
 			System.out.println(command);
 			ProcessBuilder pb = new ProcessBuilder(command);
 			p = pb.start();
-			
+			OutputStream rsyncStdIn = p.getOutputStream ();
+			rsyncStdIn.write ("aldoaldo".getBytes ());
 			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			String line="";
 			String[] lines1;
 			while (((line = reader.readLine()) != null)) {
-				lines1 = line.split("\n");
+				
+				System.out.println(line);
+				/*lines1 = line.split("\n");
 				lines1 = lines1[0].split(" ");
 				if(lines1[0].equals("step")){
 					ModelsMonitoringForRules.setSteps(Integer.parseInt(lines1[1]));
@@ -137,7 +141,7 @@ class StartAPP extends OneShotBehaviour {
 					ModelsMonitoringForRules.setSteps(Integer.parseInt(lines1[1]));
 					System.out.println("Mase Step "+ModelsMonitoringForRules.getSteps());
 					finalizado = "Finalizado Mase Step "+ModelsMonitoringForRules.getSteps();
-				}
+				}*/
 				
 				
 			}
@@ -165,11 +169,13 @@ class StartAPP extends OneShotBehaviour {
 		try {
 			p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 "+Starter.Starter.machine.getIp());
 			//System.out.println("ping -c 1 "+Starter.Starter.machine.getIp());
-			String[] command2 = { "/bin/bash", "-c","gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-west1-b command 'cat executando'"};
-			System.out.println("gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-west1-b command 'cat executando'");
+			String[] command2 = { "/bin/bash", "-c","gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-central1-c --command='cat executando'"};
+			System.out.println("gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-central1-c --command='cat executando'");
 			ProcessBuilder pb = new ProcessBuilder(command2);
 			Process pr;
 			pr = pb.start();
+			OutputStream rsyncStdIn = pr.getOutputStream ();
+			rsyncStdIn.write ("aldoaldo".getBytes ());
 			String line ="";
 			BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			while ((line = reader.readLine()) != null) {
@@ -187,10 +193,11 @@ class StartAPP extends OneShotBehaviour {
 	    		Starter.Starter.vm=0;
 		    	System.out.println("No Connect");
 		    	try {
-					String[] command = { "/bin/bash", "-c","echo 'Y\n' | gcloud compute instances delete instancenew"+Starter.Starter.model.getCpuSelected()+" --zone 'us-west1-b'"};
+					String[] command = { "/bin/bash", "-c","echo 'Y\n' | gcloud compute instances delete instancenew"+Starter.Starter.model.getCpuSelected()+" --zone 'us-central1-c'"};
 					pb = new ProcessBuilder(command);
 					Process pp = pb.start();
-
+					rsyncStdIn = pr.getOutputStream ();
+					rsyncStdIn.write ("aldoaldo".getBytes ());
 					reader = new BufferedReader(new InputStreamReader(pp.getInputStream()));
 					line="";
 
@@ -286,7 +293,7 @@ class StopMonitoring extends OneShotBehaviour {
 				e.printStackTrace();
 			}
 			MonitoringAgents.tempoInicial=(System.currentTimeMillis() - MonitoringAgents.tempoInicial);
-			gravarArq.append(DadosMonitorados.AVGCPUidl+","+DadosMonitorados.AVGCPU+","+Starter.Starter.machine.getCpu()+","+Starter.Starter.transformationAgentQty + "," + (MonitoringAgents.tempoInicial)+ "\n");
+			gravarArq.append(DadosMonitorados.AVGCPUidl+","+DadosMonitorados.AVGCPU+","+Starter.Starter.machine.getCpu()+","+Starter.Starter.transformationAgentQty + "," + (MonitoringAgents.tempoInicial)+ "," +models.ModelsProvisioning.getBestBalance()+ "\n");
 			gravarArq.close();
 			System.out.println(DadosMonitorados.AVGCPUidl+","+DadosMonitorados.AVGCPU+","+Starter.Starter.machine.getCpu()+","+Starter.Starter.transformationAgentQty + "," + (MonitoringAgents.tempoInicial)+ "\n");
 			
