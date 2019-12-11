@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="binaries1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/examples/binaries/miglayout-3.7.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/examples/binaries/logback-classic-1.0.9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/examples/binaries/drools-examples-6.5.0.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/examples/binaries/commons-io-2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/examples/binaries/gson-1.7.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/examples/binaries/logback-core-1.0.9.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,30 @@
+<component name="libraryTable">
+  <library name="drools-distribution-6.5.0.Final">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/jbpm-flow-builder.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/junit.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/poi.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/drools-compiler.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/xpp3_min.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/xstream.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/jbpm-flow.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/jbpm-bpmn2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/kie-api.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/poi-ooxml.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/jsr94.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/protobuf-java.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/kie-internal.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/antlr-runtime.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/org.eclipse.jdt.core_3.12.2.v20161117-1814.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/xmlpull.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/drools-templates.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/drools-jsr94.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/slf4j-api.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/mvel2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/drools-decisiontables.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/drools-core.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

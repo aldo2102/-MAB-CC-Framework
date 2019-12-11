@@ -1,0 +1,23 @@
+<component name="libraryTable">
+  <library name="sources">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-reteoo-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-core-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-templates-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-scorecards-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-persistence-jpa-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/knowledge-api-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-compiler-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/kie-ci-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-pmml-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/kie-api-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-verifier-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-beliefs-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-decisiontables-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/drools-jsr94-6.5.0.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/sources/kie-internal-6.5.0.Final-sources.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

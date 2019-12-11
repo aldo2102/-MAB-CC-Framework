@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="MAS-Cloud">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/opencsv-3.8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/MASEX.jar!/" />
+      <root url="jar://$PROJECT_DIR$/slf4j-simple-1.7.21.jar!/" />
+      <root url="jar://$PROJECT_DIR$/Jama-1.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/UntitledSelected.jar!/" />
+      <root url="jar://$PROJECT_DIR$/Untitled.jar!/" />
+      <root url="jar://$PROJECT_DIR$/Untitled44.jar!/" />
+      <root url="jar://$PROJECT_DIR$/kie-api-7.0.0.Final.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="kie-ci-osgi-6.5.0.Final">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/drools-distribution-6.5.0.Final/osgi-binaries/kie-ci-osgi-6.5.0.Final.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

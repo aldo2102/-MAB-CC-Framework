@@ -1,0 +1,7 @@
+.git
+.ideia
+.metadata
+.settings
+/bin
+*.json
+/out
