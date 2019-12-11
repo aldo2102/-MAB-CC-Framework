@@ -9,10 +9,11 @@ import Starter.Starter;
 
 rule "Provisioning rule price"
 	when
-        m: ModelsProvisioning(ModelsProvisioning.getMemoryUSEDSelected() >= (m.getMemoryUSED()+(m.getMemoryUSED()*Starter.cpuUsageVariable)) ||
+        m: ModelsProvisioning(
         ModelsProvisioning.getPriceSelected() >= (m.getPrice()+(m.getPrice()*Starter.priceVariable)) ||
 			(ModelsProvisioning.getTimeSelected() >= (m.getTime()+(m.getTime()*Starter.timeVariable))) ||
-			 (ModelsProvisioning.getCpuUsedSelected() <= (m.getCpuUSED()+(m.getCpuUSED()*Starter.timeVariable)))
+			 (ModelsProvisioning.getCpuUsedSelected() <= (m.getCpuUSED()+(m.getCpuUSED()*Starter.timeVariable))) ||
+			 ModelsProvisioning.getMemoryUSEDSelected() >= (m.getMemoryUSED()+(m.getMemoryUSED()*Starter.cpuUsageVariable))
         )
     then
     	ModelsProvisioning.setTimeSelected(m.getTime());
@@ -20,13 +21,17 @@ rule "Provisioning rule price"
     	ModelsProvisioning.setTimesCandidates(m.getTime());
 		ModelsProvisioning.setCpuUsedSelected(m.getCpuUSED());
 		
-		double val = ((m.getMemoryUSED()+(m.getMemoryUSED()*Starter.cpuUsageVariable))+(m.getCpuUSED()+(m.getCpuUSED()*Starter.cpuUsageVariable))+(m.getCpuUSED()+(m.getCpuUSED()*Starter.timeVariable))/(((m.getTime()-(m.getTime()*Starter.timeVariable))-(m.getPrice()*Starter.priceVariable))));
+		double memory = m.getMemoryUSED()*Starter.cpuUsageVariable;
+		double cpu = m.getCpuUSED()*Starter.cpuUsageVariable;
+		double price = m.getPrice()*Starter.priceVariable;
 				
-				val = Math.ceil(val * 1000) / 1000;
+		double val = memory + cpu + price;
 				
-				
-		m.setBalance(Math.abs(val));
+			
+		m.setBalance(val);
 		ModelsProvisioning.setPriceSelected(m.getPrice());
+		
+		System.out.println( "Drools regra Balanco price "+m.getBalance()+" CPU "+m.getMemoryUSED());	
 		ModelsProvisioning.setCpusCandidates(m);
 		System.out.println( "Drools regra Balanco price "+m.getBalance()+" CPU "+m.getMemoryUSED());
 

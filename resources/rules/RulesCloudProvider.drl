@@ -10,9 +10,9 @@ import Starter.Starter;
 rule "Executions below 10 minutes"
 
    when
-     m: Integer(ModelsProvisioning.getBestBalance() < Starter.model.getCpusCandidates(m.intValue()).getBalance() ||
-      (Starter.model.getTimeSelected()>=Starter.model.getCpusCandidates(m.intValue()).getTime()) &&
-      ModelsProvisioning.getBestBalance() == Starter.model.getCpusCandidates(m.intValue()).getBalance()
+     m: Integer(ModelsProvisioning.getBestBalance() > Starter.model.getCpusCandidates(m.intValue()).getBalance() ||
+      (Starter.model.getTimeSelected() >= Starter.model.getCpusCandidates(m.intValue()).getTime()) &&
+      Starter.model.getPriceSelected() >= Starter.model.getCpusCandidates(m.intValue()).getPrice()
       )
         
     then

@@ -29,6 +29,7 @@ public class StarterAgent extends Agent {
 			catch (Exception ex) {
 				ex.printStackTrace();
 			}
+			doDelete();
 	}
 	protected void takeDown(){
 		System.out.println("Agent "+ getAID().getLocalName() +" finishing.");

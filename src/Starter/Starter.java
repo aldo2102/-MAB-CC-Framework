@@ -1,6 +1,7 @@
 package Starter;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -9,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -22,6 +25,8 @@ import com.opencsv.CSVReader;
 
 import Agents.MonitoringAgents;
 import jade.core.Agent;
+import jade.core.AgentContainer;
+import jade.core.IMTPException;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.wrapper.AgentController;
@@ -67,12 +72,36 @@ public class Starter extends Agent {
 	public static int minimumTime;
 	public static int lineNumber;
 	public static String command;
+	public static String box;
+	public static String usuarioMasCloud;
+
+	public static String vagrant;
+	public static String vagrant2;
+	public static String vagrant3;
 
 	public static void main(String[] args) {
-
+		
+	
 		// Argumento 4 diz o tempo
 		// Argumento 5 diz o Uso de CPU
 		// Argumento 6 diz o Preço
+
+		create();
+		String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+		System.out.println(OS);
+
+		ProcessBuilder processBuilder = new ProcessBuilder();
+
+		if (OS.equals("windows 10")) {
+			vagrant3 = "/c";
+			vagrant2 = "cmd.exe";
+			vagrant = "C:\\Vagrant\\bin\\vagrant.exe";
+		} else {
+			vagrant3 = "-c";
+			vagrant2 = "bash";
+			vagrant = "vagrant";
+
+		}
 
 		timeVariable = Integer.parseInt(args[4]);
 		cpuUsageVariable = Integer.parseInt(args[5]);
@@ -83,6 +112,16 @@ public class Starter extends Agent {
 		priceVariable = priceVariable / 100;
 
 		System.out.println(timeVariable + " " + cpuUsageVariable + " " + priceVariable);
+
+		box = args[7];
+		usuarioMasCloud = args[8];
+
+		try {
+			File diretorio = new File(usuarioMasCloud);
+			diretorio.mkdir();
+		} catch (Exception ex) {
+			System.out.println(ex);
+		}
 
 		try {
 			ks = KieServices.Factory.get();
@@ -96,11 +135,13 @@ public class Starter extends Agent {
 		Process pr = null;
 		usuario = "aldoh_ti";
 		if (args.length > 1) {
-			
-			command = args[1];
 
-			//transformationAgentQty = Integer.parseInt(args[1]);
-			transformationAgentQty = (command.hashCode()<0?command.hashCode()*-1:command.hashCode());
+			command = args[1];
+			// String commandTrans = command;
+			// transformationAgentQty = Integer.parseInt(args[1]);
+			transformationAgentQty = command.hashCode();
+
+			System.out.println("Agents of Transfomation " + transformationAgentQty);
 			System.out.println(command);
 			System.out.println(transformationAgentQty);
 			incremmet = Integer.parseInt(args[2]);
@@ -111,15 +152,13 @@ public class Starter extends Agent {
 
 			providerCloud = Integer.parseInt(args[3]);
 
-		} else {
-			transformationAgentQty = 30;
 		}
 
 		BufferedReader br = null;
 		try {
-			File f = new File("falha.csv");
+			File f = new File(usuarioMasCloud + "/" + "falha.csv");
 			if (f.exists() && !f.isDirectory()) {
-				br = new BufferedReader(new FileReader("falha.csv"));
+				br = new BufferedReader(new FileReader(usuarioMasCloud + "/" + "falha.csv"));
 				try {
 					StringBuilder sb = new StringBuilder();
 					String line = br.readLine();
@@ -130,7 +169,8 @@ public class Starter extends Agent {
 						sb.append(line);
 						sb.append(System.lineSeparator());
 						line = br.readLine();
-						// System.out.println("Teste leitura "+lines1[0]+" "+lines1[1]+" "+lines1[2]+"
+						// System.out.println("Teste leitura "+lines1[0]+" && "+lines1[1]+" &&
+						// "+lines1[2]+"
 						// "+lines1[lines1.length-2]);
 					}
 					br.close();
@@ -148,11 +188,11 @@ public class Starter extends Agent {
 		}
 		FileWriter arqFalha = null;
 		PrintWriter gravarArqFalha = null;
-		File f = new File("falha.csv");
+		File f = new File(usuarioMasCloud + "/" + "falha.csv");
 		if (f.exists() && !f.isDirectory()) {
 
 			try {
-				arqFalha = new FileWriter("falha.csv", false);
+				arqFalha = new FileWriter(usuarioMasCloud + "/" + "falha.csv", false);
 				gravarArqFalha = new PrintWriter(arqFalha);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -177,15 +217,18 @@ public class Starter extends Agent {
 		// AWS
 		else if (providerCloud == 2) {
 			PriceAWS.prices();
+		} else if (providerCloud == 3) {
+			PriceVangrant.prices();
+			System.out.println(prices.getCpuPrice());
+			System.out.println(prices.getMemoryPrice());
 		}
 
-		create();
 		BufferedReader reader;
 		String line;
-		model.setCpuUsedSelected(0);
-		model.setPriceSelected(Double.MAX_VALUE);
-		model.setTimeSelected(Double.MAX_VALUE);
-		model.setBestBalance(Double.MIN_VALUE);
+		ModelsProvisioning.setCpuUsedSelected(0);
+		ModelsProvisioning.setPriceSelected(Double.MAX_VALUE);
+		ModelsProvisioning.setTimeSelected(Double.MAX_VALUE);
+		ModelsProvisioning.setBestBalance(Double.MIN_VALUE);
 		ModelsMonitoringForRules.setTotalSteps(365);
 		valuesCpus = new ArrayList<ModelsProvisioning>();
 		model = new ModelsProvisioning(0, 0, 0, 0, 0);
@@ -206,27 +249,26 @@ public class Starter extends Agent {
 			synchronized (platform) {
 				String[] nextLine;
 				String strFile;
-				
+
 				int cont = 1;
 				CSVReader reader2 = null;
 
 				// csv file containing data
-				strFile = "base.csv";
+				strFile = usuarioMasCloud + "/" + "base.csv";
 				try {
 					File fl = new File(strFile);
-					if(!fl.exists()){
+					if (!fl.exists()) {
 						fl.createNewFile();
-					}else{
-					  System.out.println("File already exists");
+					} else {
+						System.out.println("File already exists");
 					}
 					reader2 = new CSVReader(new FileReader(strFile));
-					lineNumber=0;
+					lineNumber = 0;
 					while ((nextLine = reader2.readNext()) != null) {
-						if(nextLine.length>1)
+						if (nextLine.length > 1)
 							lineNumber++;
 					}
 					reader2.close();
-					
 
 				} catch (FileNotFoundException e2) {
 					// TODO Auto-generated catch block
@@ -235,43 +277,50 @@ public class Starter extends Agent {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				System.out.println("Quantidade de linhas "+lineNumber);
+				System.out.println("Quantidade de linhas " + lineNumber);
 				if (lineNumber <= 0) {
+					machine.setCpu(1);
 					model.setCpuSelected(1);
 				} else if (lineNumber == 1) {
+					machine.setCpu(2);
 					model.setCpuSelected(2);
 				} else if (lineNumber == 2) {
+					machine.setCpu(4);
 					model.setCpuSelected(4);
 				}
 
 				else if (lineNumber == 3) {
+					machine.setCpu(6);
 					model.setCpuSelected(6);
 				}
 
 				else if (lineNumber == 4) {
+					machine.setCpu(8);
 					model.setCpuSelected(8);
-				}
-				else if (lineNumber == 5) {
+				} else if (lineNumber == 5) {
 					Random r = new Random();
-					int r2= r.nextInt((8 - 1) + 1) + 1;
-					if(r2==3)
+					int r2 = r.nextInt((8 - 1) + 1) + 1;
+					if (r2 == 3)
 						r2--;
-					else if(r2==5)
+					else if (r2 == 5)
 						r2--;
-					else if(r2==7)
+					else if (r2 == 7)
 						r2--;
 					model.setCpuSelected(r2);
 				} else {
 					try {
-					MultipleLinearRegression Prov = new MultipleLinearRegression("base.csv");
+						MultipleLinearRegression Prov = new MultipleLinearRegression(
+								usuarioMasCloud + "/" + "base.csv");
 					} catch (RuntimeException t) {
+						System.out.println(t.getMessage());
+						System.out.println("---------------- Atenção entrou em Cath, Verifique ----------------");
 						Random r = new Random();
-						int r2= r.nextInt((8 - 1) + 1) + 1;
-						if(r2==3)
+						int r2 = r.nextInt((8 - 1) + 1) + 1;
+						if (r2 == 3)
 							r2--;
-						else if(r2==5)
+						else if (r2 == 5)
 							r2--;
-						else if(r2==7)
+						else if (r2 == 7)
 							r2--;
 						model.setCpuSelected(r2);
 					}
@@ -287,7 +336,6 @@ public class Starter extends Agent {
 					} catch (Throwable t) {
 						t.printStackTrace();
 					}
-					// stopPlatform();
 
 					// stopPlatform();
 
@@ -296,17 +344,37 @@ public class Starter extends Agent {
 
 				try {
 					// Google Cloud
+					/*
+					 * if (providerCloud == 2) { if (model.getCpuSelected() > 8)
+					 * model.setCpuSelected(8); String[] command1 = { vagrant2, vagrant3,
+					 * "gcloud compute instances create instancenew" + model.getCpuSelected() +
+					 * " --custom-cpu " + model.getCpuSelected() + " --custom-memory " +
+					 * model.getCpuSelected() +
+					 * "GB --zone us-central1-c --disk name=disk-bio,boot=yes" };
+					 * System.out.println("gcloud compute instances create instancenew" +
+					 * model.getCpuSelected() + " --custom-cpu " + model.getCpuSelected() +
+					 * " --custom-memory " + model.getCpuSelected() +
+					 * "GB --zone us-central1-c --disk name=disk-bio,boot=yes"); pb = new
+					 * ProcessBuilder(command1); pr = pb.start(); System.out.println("create MV");
+					 * OutputStream rsyncStdIn = pr.getOutputStream();
+					 * rsyncStdIn.write("aldoaldo".getBytes()); pr.waitFor(); reader = new
+					 * BufferedReader(new InputStreamReader(pr.getInputStream()));
+					 * 
+					 * while ((line = reader.readLine()) != null) { } }
+					 */
+
+					// AWS
 					if (providerCloud == 2) {
 						if (model.getCpuSelected() > 8)
 							model.setCpuSelected(8);
-						String[] command1 = { "/bin/bash", "-c",
+						String[] command1 = { vagrant2, vagrant3,
 								"gcloud compute instances create instancenew" + model.getCpuSelected()
 										+ " --custom-cpu " + model.getCpuSelected() + " --custom-memory "
 										+ model.getCpuSelected()
-										+ "GB --zone us-central1-c --disk name=disk-1,boot=yes" };
+										+ "GB --zone us-central1-c  --disk name=disk-bio,boot=yes" };
 						System.out.println("gcloud compute instances create instancenew" + model.getCpuSelected()
 								+ " --custom-cpu " + model.getCpuSelected() + " --custom-memory "
-								+ model.getCpuSelected() + "GB --zone us-central1-c --disk name=disk-1,boot=yes");
+								+ model.getCpuSelected() + "GB --zone us-central1-c  --disk name=disk-bio,boot=yes");
 						pb = new ProcessBuilder(command1);
 						pr = pb.start();
 						System.out.println("create MV");
@@ -319,87 +387,155 @@ public class Starter extends Agent {
 						}
 					}
 
-					// AWS
-					if (providerCloud == 1) {
-						if (model.getCpuSelected() > 8)
-							model.setCpuSelected(8);
-						String[] command1 = { "/bin/bash", "-c",
-								"gcloud compute instances create instancenew" + model.getCpuSelected()
-										+ " --custom-cpu " + model.getCpuSelected() + " --custom-memory "
-										+ model.getCpuSelected()
-										+ "GB --zone us-central1-c  --disk name=disk-1,boot=yes" };
-						System.out.println("gcloud compute instances create instancenew" + model.getCpuSelected()
-								+ " --custom-cpu " + model.getCpuSelected() + " --custom-memory "
-								+ model.getCpuSelected() + "GB --zone us-central1-c  --disk name=disk-1,boot=yes");
-						pb = new ProcessBuilder(command1);
-						pr = pb.start();
-						System.out.println("create MV");
-						OutputStream rsyncStdIn = pr.getOutputStream();
-						rsyncStdIn.write("aldoaldo".getBytes());
-						pr.waitFor();
-						reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+					if (providerCloud == 3) {
 
-						while ((line = reader.readLine()) != null) {
+						/*
+						 * String[] command1 = { vagrant2, vagrant3,
+						 * "gcloud compute instances create instancenew" + model.getCpuSelected() +
+						 * " --custom-cpu " + model.getCpuSelected() + " --custom-memory " +
+						 * model.getCpuSelected() +
+						 * "GB --zone us-central1-c  --disk name=disk-bio,boot=yes" };
+						 */
+
+						String str = "Vagrant.configure(\"2\") do |config|\n" + "  config.vm.box = \"" + box + "\"\n"
+								+ "  config.vm.provider :virtualbox do |v|\n"
+								+ "    v.customize [\"modifyvm\", :id, \"--memory\", 1024]\n"
+								+ "    v.customize [\"modifyvm\", :id, \"--cpus\", " + model.getCpuSelected() + "]\n"
+								+ "  end\n" + "end";
+
+						System.out.println("Quantidade de CPUs " + model.getCpuSelected());
+
+						try (FileWriter writer = new FileWriter(usuarioMasCloud + "/" + "Vagrantfile");
+								BufferedWriter bw = new BufferedWriter(writer)) {
+
+							bw.write(str);
+
+						} catch (IOException e) {
+							System.err.format("IOException: %s%n", e);
 						}
+
 					}
-					pr.waitFor();
 				} catch (NumberFormatException | InterruptedException | IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				try {
-					String[] command1 = { "/bin/bash", "-c",
-							"printf 'Y\n' | gcloud compute instances describe instancenew" + model.getCpuSelected()
-									+ " --zone us-central1-c " };
-					pb = new ProcessBuilder(command1);
-					pr = pb.start();
-					System.out.println("Get IP");
-					OutputStream rsyncStdIn = pr.getOutputStream();
-					rsyncStdIn.write("aldoaldo".getBytes());
-					pr.waitFor();
-					reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-					String split = "[ ]{2,}natIP: ";
-					String[] lines = null;
-					while ((line = reader.readLine()) != null) {
-						lines = line.split("\n");
-						lines = lines[0].split(split);
-						if (lines.length > 1) {
-							machine.setIp(lines[1]);
-							break;
+					OutputStream rsyncStdIn;
+					if (providerCloud == 2) {
+						String[] command1 = { vagrant2, vagrant3,
+								"printf 'Y\n' | gcloud compute instances describe instancenew" + model.getCpuSelected()
+										+ " --zone us-central1-c " };
+						pb = new ProcessBuilder(command1);
+						pr = pb.start();
+						System.out.println("Created VM");
+						rsyncStdIn = pr.getOutputStream();
+						rsyncStdIn.write("aldoaldo".getBytes());
+						pr.waitFor();
+						reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+						String split = "[ ]{2,}natIP: ";
+						String[] lines = null;
+						while ((line = reader.readLine()) != null) {
+							lines = line.split("\n");
+							lines = lines[0].split(split);
+							if (lines.length > 1) {
+								machine.setIp(lines[1]);
+								break;
+							}
 						}
 					}
+					if (providerCloud == 3) {
 
-					String[] command2 = { "/bin/bash", "-c", "gcloud compute ssh instancenew" + model.getCpuSelected()
-							+ " --zone us-central1-c --command=\"echo 'np' >executando\"" };
-					pb = new ProcessBuilder(command2);
-					System.out.println("gcloud compute ssh instancenew" + model.getCpuSelected()
-							+ " --zone us-central1-c command \"echo 'executando' >executando\"");
-					pr = pb.start();
-					rsyncStdIn = pr.getOutputStream();
-					rsyncStdIn.write("aldoaldo".getBytes());
-					rsyncStdIn = pr.getOutputStream();
-					rsyncStdIn.write("aldoaldo".getBytes());
-					pr.waitFor();
+						System.out.println("cd " + usuarioMasCloud + " && " + vagrant + " box add " + box);
+						String[] command1 = { vagrant2, vagrant3,
+								"cd " + usuarioMasCloud + " && " + vagrant + " box add " + box };
+						pb = new ProcessBuilder(command1);
+						pr = pb.start();
+
+						pr.waitFor();
+						reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+
+						while ((line = reader.readLine()) != null) {
+							System.out.println(line);
+						}
+
+						System.out.println("cd " + usuarioMasCloud + " && " + vagrant + " up");
+						String[] command2 = { vagrant2, vagrant3, "cd " + usuarioMasCloud + " && " + vagrant + " up" };
+						pb = new ProcessBuilder(command2);
+						pr = pb.start();
+
+						pr.waitFor();
+						reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+						while ((line = reader.readLine()) != null) {
+							System.out.println(line);
+						}
+
+						System.out.println("create MV");
+					}
+
+					if (providerCloud == 2) {
+						String[] command2 = { vagrant2, vagrant3,
+								"gcloud compute instances instancenew" + model.getCpuSelected()
+										+ " --zone us-central1-c --command=\"echo 'np' >executando\"" };
+						pb = new ProcessBuilder(command2);
+						System.out.println("gcloud compute ssh instancenew" + model.getCpuSelected()
+								+ " --zone us-central1-c command \"echo 'executando' >executando\"");
+						pr = pb.start();
+						rsyncStdIn = pr.getOutputStream();
+						rsyncStdIn.write("aldoaldo".getBytes());
+						rsyncStdIn = pr.getOutputStream();
+						rsyncStdIn.write("aldoaldo".getBytes());
+						pr.waitFor();
+					}
+					if (providerCloud == 3) {
+						String[] command2 = { vagrant2, vagrant3,
+								"cd " + usuarioMasCloud + " && " + vagrant + " ssh -c \"echo 'np' >executando\"" };
+						pb = new ProcessBuilder(command2);
+						System.out.println("gcloud compute ssh instancenew" + model.getCpuSelected()
+								+ " --zone us-central1-c command \"echo 'executando' >executando\"");
+						pr = pb.start();
+						rsyncStdIn = pr.getOutputStream();
+						rsyncStdIn.write("aldoaldo".getBytes());
+						rsyncStdIn = pr.getOutputStream();
+						rsyncStdIn.write("aldoaldo".getBytes());
+						pr.waitFor();
+					}
+
 				} catch (NumberFormatException | InterruptedException | IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
 				Process p = null;
+				if (providerCloud == 2) {
+					try {
+						String[] command2 = { vagrant2, vagrant3, "gcloud compute ssh instancenew"
+								+ model.getCpuSelected() + " --zone us-central1-c --command='nproc'" };
 
-				try {
-					String[] command2 = { "/bin/bash", "-c", "gcloud compute ssh instancenew" + model.getCpuSelected()
-							+ " --zone us-central1-c --command='nproc'" };
+						pb = new ProcessBuilder(command2);
+						pr = pb.start();
+						p = pb.start();
+						OutputStream rsyncStdIn = pr.getOutputStream();
+						rsyncStdIn.write("aldoaldo".getBytes());
+						pr.waitFor();
+					} catch (IOException | InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				if (providerCloud == 3) {
+					try {
+						String[] command2 = { vagrant2, vagrant3,
+								"cd " + usuarioMasCloud + " && " + vagrant + " ssh -c 'nproc'" };
 
-					pb = new ProcessBuilder(command2);
-					pr = pb.start();
-					p = pb.start();
-					OutputStream rsyncStdIn = pr.getOutputStream();
-					rsyncStdIn.write("aldoaldo".getBytes());
-					pr.waitFor();
-				} catch (IOException | InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+						pb = new ProcessBuilder(command2);
+						pr = pb.start();
+						p = pb.start();
+
+						pr.waitFor();
+					} catch (IOException | InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 
 				reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -408,6 +544,7 @@ public class Starter extends Agent {
 				machine.setCpu(0);
 				try {
 					while ((line = reader.readLine()) != null) {
+						System.out.println(line);
 						machine.setCpu(Integer.parseInt(line));
 					}
 				} catch (NumberFormatException | IOException e) {
@@ -454,7 +591,7 @@ public class Starter extends Agent {
 
 				int alternative = model.getCpuSelected();
 				try {
-					arqFalha = new FileWriter("falha.csv", true);
+					arqFalha = new FileWriter(usuarioMasCloud + "/" + "falha.csv", true);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -463,7 +600,7 @@ public class Starter extends Agent {
 				gravarArqFalha.append(", " + ii);
 				gravarArqFalha.close();
 				verificationBase();
-				transformationAgentQty = transformationAgentQty + incremmet;
+
 				ModelsProvisioning.setCpuUsedSelected(0);
 				ModelsProvisioning.setMemoryUSEDSelected(0);
 				model.setTimeSelected(Double.MAX_VALUE);
@@ -479,14 +616,25 @@ public class Starter extends Agent {
 				System.out.println("\n\n Nova quantidade de Agentes " + transformationAgentQty + " \n\n");
 				System.out.println(alternative + " valores " + model.getCpuSelected());
 
-				if (alternative != model.getCpuSelected() || ii + 1 == Integer.parseInt(args[0])) {
+				if (alternative != model.getCpuSelected() || ii + 1 == Integer.parseInt(args[0]))
+
 					try {
-						String[] command = { "/bin/bash", "-c",
-								"echo 'Y\n' | gcloud compute instances delete instancenew" + alternative
-										+ " --zone 'us-central1-c'" };
-						// System.out.println("echo 'Y\n' | gcloud compute instances delete
-						// instancenew"+model.getCpuSelected()+" --zone 'us-central1-c'");
-						pb = new ProcessBuilder(command);
+
+						if (providerCloud == 2) {
+							String[] command1 = { vagrant2, vagrant3,
+									"echo 'Y\n' | gcloud compute instances delete instancenew" + alternative
+											+ " --zone 'us-central1-c'" };
+							System.out.println("echo 'Y\n' | gcloud compute instances delete" + "instancenew"
+									+ model.getCpuSelected() + " --zone 'us-central1-c'); ");
+							pb = new ProcessBuilder(command1);
+						}
+
+						if (providerCloud == 3) {
+							String[] command1 = { vagrant2, vagrant3, "echo 'Y\n' " + vagrant + " halt" };
+							System.out.println("echo 'Y\n' " + vagrant + " halt ");
+							pb = new ProcessBuilder(command1);
+						}
+
 						pp = pb.start();
 						System.out.println("Excluindo MV");
 						OutputStream rsyncStdIn = pr.getOutputStream();
@@ -498,22 +646,21 @@ public class Starter extends Agent {
 							while ((line = reader.readLine()) != null) {
 								System.out.println(line);
 							}
-						} catch (NumberFormatException | IOException e) {
-							// TODO Auto-generated catch block
+						} catch (NumberFormatException | IOException e) { // TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						pp.waitFor();
 
+						pp.waitFor();
 					} catch (IOException | InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				}
-				if (ii + 1 != Integer.parseInt(args[0])) {
 
-					System.out.println("CreateNewPlatforma");
-					create();
-				}
+				/*
+				 * if (ii + 1 != Integer.parseInt(args[0])) {
+				 * 
+				 * System.out.println("CreateNewPlatforma"); create(); }
+				 */
 
 			}
 
@@ -522,7 +669,7 @@ public class Starter extends Agent {
 		FileWriter arq;
 		PrintWriter gravarArq = null;
 		try {
-			arq = new FileWriter("/home/" + usuario + "/statsTempo.csv", true);
+			arq = new FileWriter(usuarioMasCloud + "/" + "statsTempo.csv", true);
 			gravarArq = new PrintWriter(arq);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -530,12 +677,17 @@ public class Starter extends Agent {
 		}
 		gravarArq.append(tempoModel + "\n");
 		gravarArq.close();
+
 		try {
-			arqFalha = new FileWriter("falha.csv", true);
+			arqFalha = new FileWriter(usuarioMasCloud + "/" + "falha.csv", true);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+
+		stopPlatform();
+		System.out.println(command);
+		System.out.println("------------------- Final -----------------------");
 		gravarArqFalha = new PrintWriter(arqFalha);
 		gravarArqFalha.append(", right");
 		gravarArqFalha.close();
@@ -543,31 +695,62 @@ public class Starter extends Agent {
 	}
 
 	public static void create() {
+		
 		// get a JADE runtime
 		Runtime rt = Runtime.instance();
-		// create a default profile
-		Profile p1 = new ProfileImpl();
-		// create the Main-container
-		ContainerController mainContainer = rt.createMainContainer(p1);
+
+		// p.setParameter(Profile.MAIN_HOST, "localhost");
+		int port = 10000;
+		int controler = 1;
+
+		ServerSocket socket = null;
 		try {
-			platform = mainContainer.getPlatformController();
-		} catch (ControllerException e) {
-			// TODO Auto-generated catch block
+			Random gerador = new Random();
+			socket = new ServerSocket(0);
+			port = socket.getLocalPort()+(gerador.nextInt(25)+1);
+		}
+
+		catch (Exception e) {
 			e.printStackTrace();
 		}
+		//while (controler == 1) {
+			ProfileImpl p = new ProfileImpl();
+			p.setParameter(Profile.MAIN_PORT, port + "");
+		    //p.setParameter(Profile.MAIN_HOST, "localhost");
+		    //p.setParameter(Profile.GUI, "false");
+
+			p.setParameter(Profile.CONTAINER_NAME, "Main-Container" + port);
+			try {
+				rt.shutDown();
+				
+				ContainerController cc = Runtime.instance().createMainContainer(p);
+				System.out.println("-Main-Container" + port);
+					  
+				System.out.println(jade.core.Runtime.instance());
+				//ContainerController mainContainer = rt.createMainContainer(p);
+
+				platform = cc.getPlatformController();
+
+				controler = 1;
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		//}
+
 	}
 
 	public static void stopPlatform() {
 		System.out.println("stop");
-		synchronized (geral) {
-			geral.notifyAll();
+
 			try {
+				//platform.notifyAll();
 				platform.kill();
 			} catch (ControllerException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+		
 	}
 
 	public static void verificationBase() {
@@ -579,8 +762,8 @@ public class Starter extends Agent {
 
 				try {
 
-					file = new Scanner(new File("/home/" + usuario + "/base.csv"));
-					writer = new PrintWriter("/home/" + usuario + "/auxbase.csv");
+					file = new Scanner(new File(usuarioMasCloud + "/" + "base.csv"));
+					writer = new PrintWriter(usuarioMasCloud + "/" + "auxbase.csv");
 
 					while (file.hasNext()) {
 						String line = file.nextLine();
@@ -600,9 +783,9 @@ public class Starter extends Agent {
 				Process pr;
 				ProcessBuilder pb = null;
 				/*
-				 * String[] command = { "/bin/bash",
-				 * "-c","cp base.csv /home/"+usuario+"/auxbase.csv"}; ProcessBuilder pb = new
-				 * ProcessBuilder(command); pr = pb.start(); pr.waitFor();
+				 * String[] command = { vagrant2,
+				 * vagrant3,"cp base.csv /home/"+usuario+"/auxbase.csv"}; ProcessBuilder pb =
+				 * new ProcessBuilder(command); pr = pb.start(); pr.waitFor();
 				 */
 				double r2TimeAux = ModelsProvisioning.getR2Time();
 				double r2CPUaux = ModelsProvisioning.getR2CPU();
@@ -610,7 +793,7 @@ public class Starter extends Agent {
 				FileWriter arq = null;
 				PrintWriter gravarArq = null;
 				try {
-					arq = new FileWriter("/home/" + usuario + "/auxbase.csv", true);
+					arq = new FileWriter(usuarioMasCloud + "/" + "auxbase.csv", true);
 					gravarArq = new PrintWriter(arq);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -619,12 +802,14 @@ public class Starter extends Agent {
 
 				gravarArq.append(DadosMonitorados.AVGCPUidl + "," + transformationAgentQty + "," + machine.getCpu()
 						+ "," + DadosMonitorados.AVGCPU + "," + MonitoringAgents.tempoInicial + ","
-						+ DadosMonitorados.AVGMemory + "\n");
+						+ DadosMonitorados.AVGMemory + "," + timeVariable + "," + cpuUsageVariable + "," + priceVariable
+						+ ",\"" + command + "\"\n");
 				arq.close();
 				gravarArq.close();
 				System.out.println(DadosMonitorados.AVGCPUidl + "," + transformationAgentQty + "," + machine.getCpu()
 						+ "," + DadosMonitorados.AVGCPU + "," + MonitoringAgents.tempoInicial + ","
-						+ DadosMonitorados.AVGMemory + "\n");
+						+ DadosMonitorados.AVGMemory + "," + timeVariable + "," + cpuUsageVariable + "," + priceVariable
+						+ ",\"" + command + "\"\n");
 
 				System.out.println("R2 time atual " + r2TimeAux + " R2 atualizado " + ModelsProvisioning.getR2Time());
 				System.out.println("R2 CPU atual " + r2CPUaux + " R2 atualizado " + ModelsProvisioning.getR2CPU());
@@ -632,7 +817,31 @@ public class Starter extends Agent {
 				// if(r2TimeAux<=ModelsProvisioning.getR2Time() &&
 				// r2CPUaux<=ModelsProvisioning.getR2CPU()){
 				System.out.println("=========== MELHOROU A BASE ===========");
-				// String[] command1 = { "/bin/bash", "-c","cp /home/"+usuario+"/auxbase.csv
+
+				FileWriter arq2 = null;
+				PrintWriter gravarArq2 = null;
+				System.out.println("Time estimado " + ModelsProvisioning.getTimeSelected() + " " + tempoModel + "\n");
+				System.out.println("CPU estimado " + model.getCpuUSED() + " " + DadosMonitorados.AVGCPU + "\n");
+				System.out
+						.println("Memory estimado " + model.getMemoryUSED() + " " + DadosMonitorados.AVGMemory + "\n");
+
+				try {
+					arq2 = new FileWriter(usuarioMasCloud + "/" + "baseRegression22.csv", true);
+					gravarArq2 = new PrintWriter(arq2);
+
+					gravarArq2.append("Time estimado " + model.getTimeSelected() + " " + tempoModel + "\n");
+					gravarArq2.append("CPU estimado " + model.getCpuUSED() + " " + DadosMonitorados.AVGCPU + "\n");
+					gravarArq2.append(
+							"Memory estimado " + model.getMemoryUSED() + " " + DadosMonitorados.AVGMemory + "\n");
+
+					arq2.close();
+					gravarArq2.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+				// String[] command1 = { vagrant2, vagrant3,"cp /home/"+usuario+"/auxbase.csv
 				// base.csv"};
 				// ProcessBuilder pb = new ProcessBuilder(command1);
 				// pr = pb.start();
@@ -641,8 +850,8 @@ public class Starter extends Agent {
 
 				try {
 
-					file = new Scanner(new File("/home/" + usuario + "/auxbase.csv"));
-					writer = new PrintWriter("/home/" + usuario + "/base.csv");
+					file = new Scanner(new File(usuarioMasCloud + "/" + "auxbase.csv"));
+					writer = new PrintWriter(usuarioMasCloud + "/" + "base.csv");
 
 					while (file.hasNext()) {
 						String line = file.nextLine();
@@ -659,7 +868,7 @@ public class Starter extends Agent {
 					Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
 				}
 
-				String[] command2 = { "/bin/bash", "-c", "rm /home/" + usuario + "/auxbase.csv" };
+				String[] command2 = { vagrant2, vagrant3, "rm " + usuarioMasCloud + "/auxbase.csv" };
 				pb = new ProcessBuilder(command2);
 				pr = pb.start();
 				pr.waitFor();

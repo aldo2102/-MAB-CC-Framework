@@ -53,8 +53,7 @@ import models.DadosMonitorados;
 import models.ModelsMonitoringForRules;
 
 import java.net.InetAddress;
-import java.text.SimpleDateFormat; 
-
+import java.text.SimpleDateFormat;
 
 @SuppressWarnings("unused")
 public class ManagerG extends Agent {
@@ -67,40 +66,31 @@ public class ManagerG extends Agent {
 	SequentialBehaviour seqBehaviour = new SequentialBehaviour();
 
 	protected void setup() {
-		synchronized(this){
+		synchronized (this) {
 			System.out.println("Agent " + getLocalName() + " started.");
-			
+
 			addBehaviour(new StartGM());
 			addBehaviour(new StartMonitoring());
-			
-			
-			
+
 			addBehaviour(new StartAPP());
-			
-		
-			//s.addSubBehaviour(seqBehaviour);
-			
-			
+
+			// s.addSubBehaviour(seqBehaviour);
+
 			addBehaviour(new StopMonitoring());
-			//addBehaviour(new SerializableMonitoring());
+			// addBehaviour(new SerializableMonitoring());
 
-
-
-			//s.addSubBehaviour(pr);
+			// s.addSubBehaviour(pr);
 
 		}
 
 	}
-	protected void takeDown(){
-		System.out.println("Agent "+ getAID().getLocalName() +" finishing.");
+
+	protected void takeDown() {
+		System.out.println("Agent " + getAID().getLocalName() + " finishing.");
 
 	}
-	
 
 }
-
-
-
 
 class StartAPP extends OneShotBehaviour {
 
@@ -113,37 +103,57 @@ class StartAPP extends OneShotBehaviour {
 
 		Process p = null;
 
-		String finalizado="";
+		String finalizado = "";
 		try {
-			System.out.println("Executando MASE");
+			if (Starter.Starter.providerCloud == 2) {
+				System.out.println("Executando MASE");
 
-			String[] command = { "/bin/bash", "-c","gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-central1-c --command='"+Starter.Starter.command+"'"};
-			System.out.println("kkkkkkkkkkkk gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-central1-c --command='"+Starter.Starter.command+"'");
-			System.out.println(command);
-			ProcessBuilder pb = new ProcessBuilder(command);
-			p = pb.start();
-			OutputStream rsyncStdIn = p.getOutputStream ();
-			rsyncStdIn.write ("aldoaldo".getBytes ());
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			String line="";
-			String[] lines1;
-			while (((line = reader.readLine()) != null)) {
-				
-				System.out.println(line);
-				/*lines1 = line.split("\n");
-				lines1 = lines1[0].split(" ");
-				if(lines1[0].equals("step")){
-					ModelsMonitoringForRules.setSteps(Integer.parseInt(lines1[1]));
-					System.out.println("Mase Step "+ModelsMonitoringForRules.getSteps());
-					finalizado = "Finalizado Mase Step "+ModelsMonitoringForRules.getSteps();
+				String[] command = { Starter.Starter.vagrant2, Starter.Starter.vagrant3,
+						"gcloud compute ssh instancenew" + Starter.Starter.model.getCpuSelected()
+								+ " --zone us-central1-c --command='" + Starter.Starter.command + "'" };
+
+				ProcessBuilder pb = new ProcessBuilder(command);
+				p = pb.start();
+				OutputStream rsyncStdIn = p.getOutputStream();
+				rsyncStdIn.write("aldoaldo".getBytes());
+				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				String line = "";
+				String[] lines1;
+				while (((line = reader.readLine()) != null)) {
+
+					System.out.println(line);
 				}
-				if(lines1[0].equals("Started platform:")){
-					ModelsMonitoringForRules.setSteps(Integer.parseInt(lines1[1]));
-					System.out.println("Mase Step "+ModelsMonitoringForRules.getSteps());
-					finalizado = "Finalizado Mase Step "+ModelsMonitoringForRules.getSteps();
-				}*/
+			}
+
+			if (Starter.Starter.providerCloud == 3) {
+				System.out.println("Executando MASE - Vagrant");
+
+				//String[] command = { Starter.Starter.vagrant2, Starter.Starter.vagrant3, "cd "+Starter.Starter.usuarioMasCloud+" && "+Starter.Starter.vagrant+" ssh -c '" + Starter.Starter.command + "'" };
+				String[] command = { Starter.Starter.vagrant2, Starter.Starter.vagrant3, "cd MVs/"+Starter.Starter.usuarioMasCloud+" && "+Starter.Starter.vagrant+" status" };
 				
-				
+				ProcessBuilder pb = new ProcessBuilder(command);
+				p = pb.start();
+				//OutputStream rsyncStdIn = p.getOutputStream();
+				//rsyncStdIn.write("aldoaldo".getBytes());
+				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				String line = "";
+				String[] lines1;
+				int count=0;
+				while (((line = reader.readLine()) != null)) {
+					
+						String split = "default                   ";
+						lines1 = line.split(split);
+
+						if(lines1.length>1) {
+							System.out.println(lines1[0] + " - " +lines1[1]);
+							while(!lines1[1].equals("poweroff (virtualbox)")) {
+								System.out.println("Rodando "+count);
+							}
+						}
+					//System.out.println(line);
+					count++;
+				}
+				//System.out.println("quantidade "+count);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -153,82 +163,99 @@ class StartAPP extends OneShotBehaviour {
 			p.waitFor();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
+			Starter.Starter.stopPlatform();
 			e.printStackTrace();
 		}
 
+		Starter.Starter.stopPlatform();
 		Conection();
 		System.out.println(finalizado);
-	
-	
 
 	}
-	
-	public void Conection() { 
+
+	public void Conection() {
 		Process p1;
-		
+
 		try {
-			p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 "+Starter.Starter.machine.getIp());
-			//System.out.println("ping -c 1 "+Starter.Starter.machine.getIp());
-			String[] command2 = { "/bin/bash", "-c","gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-central1-c --command='cat executando'"};
-			System.out.println("gcloud compute ssh instancenew"+Starter.Starter.model.getCpuSelected()+" --zone us-central1-c --command='cat executando'");
-			ProcessBuilder pb = new ProcessBuilder(command2);
-			Process pr;
-			pr = pb.start();
-			OutputStream rsyncStdIn = pr.getOutputStream ();
-			rsyncStdIn.write ("aldoaldo".getBytes ());
-			String line ="";
-			BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-			while ((line = reader.readLine()) != null) {
-				Starter.Starter.verification=line;
-			}
-			pr.waitFor();
-			int returnVal = p1.waitFor();
-			Thread.sleep(2000);
-	    	boolean reachable = (returnVal==0);
-	    	if(reachable && Starter.Starter.verification.equals("executando")){
-	    		System.out.println("Connect");
-	    		Starter.Starter.vm=1;
-	    	}
-	    	else{
-	    		Starter.Starter.vm=0;
-		    	System.out.println("No Connect");
-		    	try {
-					String[] command = { "/bin/bash", "-c","echo 'Y\n' | gcloud compute instances delete instancenew"+Starter.Starter.model.getCpuSelected()+" --zone 'us-central1-c'"};
-					pb = new ProcessBuilder(command);
-					Process pp = pb.start();
-					rsyncStdIn = pr.getOutputStream ();
-					rsyncStdIn.write ("aldoaldo".getBytes ());
-					reader = new BufferedReader(new InputStreamReader(pp.getInputStream()));
-					line="";
-
-					try {
-						while ((line = reader.readLine()) != null) {
-							System.out.println(line);
-						}
-					} catch (NumberFormatException | IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					pp.waitFor();
-
-					
-				} catch (IOException|InterruptedException  e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if (Starter.Starter.providerCloud == 2) {
+				p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 " + Starter.Starter.machine.getIp());
+				// System.out.println("ping -c 1 "+Starter.Starter.machine.getIp());
+				String[] command2 = { Starter.Starter.vagrant2, Starter.Starter.vagrant3, "gcloud compute ssh instancenew"
+						+ Starter.Starter.model.getCpuSelected() + " --zone us-central1-c --command='cat executando'" };
+				System.out.println("gcloud compute ssh instancenew" + Starter.Starter.model.getCpuSelected()
+						+ " --zone us-central1-c --command='cat executando'");
+				ProcessBuilder pb = new ProcessBuilder(command2);
+				Process pr;
+				pr = pb.start();
+				OutputStream rsyncStdIn = pr.getOutputStream();
+				rsyncStdIn.write("aldoaldo".getBytes());
+				String line = "";
+				BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+				while ((line = reader.readLine()) != null) {
+					Starter.Starter.verification = line;
 				}
-	    	}
+				pr.waitFor();
+				int returnVal = p1.waitFor();
+				Thread.sleep(2000);
+				boolean reachable = (returnVal == 0);
+				if (reachable && Starter.Starter.verification.equals("executando")) {
+					System.out.println("Connect");
+					Starter.Starter.vm = 1;
+				} else {
+					Starter.Starter.vm = 0;
+					System.out.println("No Connect");
+					/*
+					 * try { String[] command = { Starter.Starter.vagrant2,
+					 * Starter.Starter.vagrant3,"echo 'Y\n' | gcloud compute instances delete instancenew"+Starter.
+					 * Starter.model.getCpuSelected()+" --zone 'us-central1-c'"}; pb = new
+					 * ProcessBuilder(command); Process pp = pb.start(); rsyncStdIn =
+					 * pr.getOutputStream (); rsyncStdIn.write ("aldoaldo".getBytes ()); reader =
+					 * new BufferedReader(new InputStreamReader(pp.getInputStream())); line="";
+					 * 
+					 * try { while ((line = reader.readLine()) != null) { System.out.println(line);
+					 * } } catch (NumberFormatException | IOException e) { // TODO Auto-generated
+					 * catch block e.printStackTrace(); } pp.waitFor();
+					 * 
+					 * 
+					 * } catch (IOException|InterruptedException e) { // TODO Auto-generated catch
+					 * block e.printStackTrace(); }
+					 */
+				}
+			}
+			/*if (Starter.Starter.providerCloud == 3) {
+				p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 " + Starter.Starter.machine.getIp());
+				// System.out.println("ping -c 1 "+Starter.Starter.machine.getIp());
+				String[] command2 = { Starter.Starter.vagrant2, Starter.Starter.vagrant3, "vagrant ssh -c'cat executando'" };
+				System.out.println("vagrant ssh -c'cat executando'");
+				ProcessBuilder pb = new ProcessBuilder(command2);
+				Process pr;
+				pr = pb.start();
+				String line = "";
+				BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+				while ((line = reader.readLine()) != null) {
+					Starter.Starter.verification = line;
+				}
+				pr.waitFor();
+				int returnVal = p1.waitFor();
+				Thread.sleep(2000);
+				boolean reachable = (returnVal == 0);
+				if (reachable && Starter.Starter.verification.equals("executando")) {
+					System.out.println("Connect");
+					Starter.Starter.vm = 1;
+				} else {
+					Starter.Starter.vm = 0;
+					System.out.println("No Connect");
+					
+				}
+			}*/
+
 		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-
 
 }
-
-
-
 
 class StartMonitoring extends OneShotBehaviour {
 
@@ -274,38 +301,43 @@ class StopMonitoring extends OneShotBehaviour {
 	private static final long serialVersionUID = 1L;
 
 	public void action() {
-		
 
+		ACLMessage message = new ACLMessage(ACLMessage.INFORM);
+		message.addReceiver(new AID("MonitoringAgents", AID.ISLOCALNAME));
+		message.setContent("2");
+		myAgent.send(message);
+		System.out.println("2");
+		FileWriter arq;
+		PrintWriter gravarArq = null;
+		try {
+			arq = new FileWriter("MVs/"+Starter.Starter.usuarioMasCloud+"/"+"stats2.csv", true);
+			gravarArq = new PrintWriter(arq);
 
-			ACLMessage message = new ACLMessage(ACLMessage.INFORM);
-			message.addReceiver(new AID("MonitoringAgents", AID.ISLOCALNAME));
-			message.setContent("2");
-			myAgent.send(message);
-			System.out.println("2");
-			FileWriter arq;
-			PrintWriter gravarArq = null ;
-			try {
-				arq = new FileWriter("/home/"+Starter.Starter.usuario+"/stats2.csv",true);
-				gravarArq = new PrintWriter(arq); 
-			
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			MonitoringAgents.tempoInicial=(System.currentTimeMillis() - MonitoringAgents.tempoInicial);
-			gravarArq.append(DadosMonitorados.AVGCPUidl+","+DadosMonitorados.AVGCPU+","+Starter.Starter.machine.getCpu()+","+Starter.Starter.transformationAgentQty + "," + (MonitoringAgents.tempoInicial)+ "," +models.ModelsProvisioning.getBestBalance()+ "\n");
-			gravarArq.close();
-			System.out.println(DadosMonitorados.AVGCPUidl+","+DadosMonitorados.AVGCPU+","+Starter.Starter.machine.getCpu()+","+Starter.Starter.transformationAgentQty + "," + (MonitoringAgents.tempoInicial)+ "\n");
-			
-			synchronized (Starter.Starter.platform) {
-				Starter.Starter.platform.notifyAll();
-							
-			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		MonitoringAgents.tempoInicial = (System.currentTimeMillis() - MonitoringAgents.tempoInicial);
+		gravarArq.append(DadosMonitorados.AVGCPUidl + "," + DadosMonitorados.AVGCPU + ","
+				+ Starter.Starter.machine.getCpu() + "," + Starter.Starter.transformationAgentQty + ","
+				+ (MonitoringAgents.tempoInicial) + "," + models.ModelsProvisioning.getBestBalance() + "\n");
+		gravarArq.close();
+		System.out.println(
+				DadosMonitorados.AVGCPUidl + "," + DadosMonitorados.AVGCPU + "," + Starter.Starter.machine.getCpu()
+						+ "," + Starter.Starter.transformationAgentQty + "," + (MonitoringAgents.tempoInicial) + "\n");
 
-			Starter.Starter.stopPlatform();
+		synchronized (Starter.Starter.platform) {
+			Starter.Starter.platform.notifyAll();
+
 		}
 
+		this.takeDown();
+	}
+protected void takeDown(){
 
+	System.out.println("Agent2 "+ getAgent().getLocalName() +" finishing.");
+		
+	}
 
 }
 
@@ -319,7 +351,7 @@ class StartGM extends OneShotBehaviour {
 
 	public void action() {
 		AgentController novoAgent = null;
-		Starter.Starter.platform=myAgent.getContainerController();
+		Starter.Starter.platform = myAgent.getContainerController();
 
 		try {
 			novoAgent = Starter.Starter.platform.createNewAgent("MonitoringAgents", "Agents.MonitoringAgents", null);
@@ -328,7 +360,6 @@ class StartGM extends OneShotBehaviour {
 			e1.printStackTrace();
 		}
 
-
 		try {
 			novoAgent.start();
 		} catch (StaleProxyException e) {
@@ -336,6 +367,12 @@ class StartGM extends OneShotBehaviour {
 			e.printStackTrace();
 		}
 
+	}
+	
+
+	protected void takeDown(){
+		
+		
 	}
 
 }

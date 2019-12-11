@@ -5,17 +5,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.Collections;
-import java.util.Comparator;
 
 import com.opencsv.CSVReader;
 
-import Agents.MonitoringAgents;
 import Jama.Matrix;
 import Jama.QRDecomposition;
-import models.DadosMonitorados;
 import models.ModelsProvisioning;
 
 
@@ -42,12 +36,13 @@ public class MultipleLinearRegression  {
 		// create matrix from vector
 		Matrix Y = new Matrix(y, N);
 		
-		
 
 		// find least squares solution
 		QRDecomposition qr = new QRDecomposition(X);
-		//System.out.println(Y.ran()+" "+N);
+		//System.out.println(Y.toString().toString()+" "+N+" "+y.length);
+		
 		beta = qr.solve(Y);
+		
 
 
 		// mean of y[] values
@@ -95,12 +90,13 @@ public class MultipleLinearRegression  {
 		try {
 			//csv file containing data
 			strFile = base;
-			reader = new CSVReader(new FileReader(strFile));
-			reader.close();
+			/*reader = new CSVReader(new FileReader(strFile));
+			reader.close();*/
 			reader = new CSVReader(new FileReader(strFile));
 			while ((nextLine = reader.readNext()) != null) {
 				lineNumber++;
 			}
+			
 			
 			x = new double[lineNumber][4];
 			y = new double[lineNumber];
@@ -117,37 +113,39 @@ public class MultipleLinearRegression  {
 			while ((nextLine = reader.readNext()) != null) {
 				
 				// nextLine[] is an array of values from the line
+
+				
 				if(nextLine.length>1){
 					if(Character.isDigit(nextLine[0].charAt(0))){
-						double CPUNotUsed = (double)Math.log10(Double.parseDouble(nextLine[0]));
-						int agents = Integer.parseInt(nextLine[1]);
+						double CPUNotUsed = (double)Double.parseDouble(nextLine[0]);
+						long agents = (long)Integer.parseInt(nextLine[1]);
 						int vCPU = (int)(Double.parseDouble(nextLine[2]));
-						double CPUUsed = (double)Math.log10(Double.parseDouble(nextLine[3]));
-						double time = (double) Math.log10(Double.parseDouble(nextLine[4]));
-						double memoryUsed = (double)Math.log10(Double.parseDouble(nextLine[5]));
-						
+						double CPUUsed = (double)Double.parseDouble(nextLine[3]);
+						double time = (double)Double.parseDouble(nextLine[4]);
+						double memoryUsed = (double)Double.parseDouble(nextLine[5]);
+
 						x[lineNumber][0]=1;
-						x[lineNumber][1]=Math.log10((double) agents);
-						x[lineNumber][2]=Math.log10(vCPU);
+						x[lineNumber][1]=agents;
+						x[lineNumber][2]=vCPU;
 						x[lineNumber][3]=memoryUsed;
 						y[lineNumber]=time;
 						x1[lineNumber][0]=1;
-						x1[lineNumber][1]=(double) agents;
+						x1[lineNumber][1]=agents;
 						x1[lineNumber][2]=vCPU;
 						x1[lineNumber][3]=memoryUsed;
 						y1[lineNumber]=CPUUsed;
 						x2[lineNumber][0]=1;
-						x2[lineNumber][1]=(double) agents;
+						x2[lineNumber][1]=agents;
 						x2[lineNumber][2]=vCPU;
 						y2[lineNumber]=CPUNotUsed;
 						x3[lineNumber][0]=1;
-						x3[lineNumber][1]=(double) agents;
+						x3[lineNumber][1]=agents;
 						x3[lineNumber][2]=vCPU;
 						x3[lineNumber][3]=CPUUsed;
 						y3[lineNumber]=time;
 						x4[lineNumber][0]=1;
-						x4[lineNumber][1]=Math.log10((double) agents);
-						x4[lineNumber][2]=Math.log10(vCPU);
+						x4[lineNumber][1]=agents;
+						x4[lineNumber][2]=vCPU;
 						x4[lineNumber][3]=CPUUsed;
 						y4[lineNumber]=memoryUsed;
 						
@@ -160,7 +158,6 @@ public class MultipleLinearRegression  {
 
 			e.printStackTrace();
 		}
-		
 		
 		MultipleLinearRegression regression = new MultipleLinearRegression(x, y);
 
@@ -191,22 +188,21 @@ public class MultipleLinearRegression  {
 		FileWriter arq2 = null;
 		PrintWriter gravarArq2 = null;
 		try {
-			arq2 = new FileWriter("/home/" + Starter.usuario + "/baseRegression.csv", true);
+			arq2 = new FileWriter("baseRegression.csv", true);
 			gravarArq2 = new PrintWriter(arq2);
 			
-			gravarArq2.append("Quantity of register "+Starter.lineNumber);
 		
-			gravarArq2.append("Time = "+regression.beta(0)+" "
-					+ "+ "+ regression.beta(1)+" beta1 + "+regression.beta(2)+" beta2 + "
-					+regression.beta(3)+ " beta3   (R^2 = "+regression.R2() +")\n");
+			gravarArq2.append("Time "+regression.beta(0)+" "
+					+ regression.beta(1)+" beta1 "+regression.beta(2)+" beta2 + "
+					+regression.beta(3)+ " beta3 ;  R^2 "+regression.R2() +"\n");
 			
-			gravarArq2.append("CPU = "+regression1.beta(0)+" "
-					+ "+ "+ regression1.beta(1)+" beta1 + "+regression1.beta(2)+" beta2 + "
-					+regression1.beta(3)+ " beta3   (R^2 = "+regression1.R2() +")\n");
+			gravarArq2.append("CPU "+regression1.beta(0)+" "
+					+ regression1.beta(1)+" beta1 "+regression1.beta(2)+" beta2 "
+					+regression1.beta(3)+ " beta3  ;  R^2 "+regression1.R2() +"\n");
 			
-			gravarArq2.append("Memory = "+regression4.beta(0)+" "
-					+ "+ "+ regression4.beta(1)+" beta1 + "+regression4.beta(2)+" beta2 + "
-					+regression4.beta(3)+ " beta3   (R^2 = "+regression4.R2() +")\n");
+			gravarArq2.append("Memory "+regression4.beta(0)+" "
+					+ "+ "+ regression4.beta(1)+" beta1 "+regression4.beta(2)+" beta2 "
+					+regression4.beta(3)+ " beta3 ;  R^2 "+regression4.R2() +"\n");
 			arq2.close();
 			gravarArq2.close();
 		} catch (IOException e1) {
@@ -230,17 +226,17 @@ public class MultipleLinearRegression  {
 		int contator=1;
 		ModelsProvisioning.setCpuAvg(0);
 		ModelsProvisioning.setCpuSum(0);
-		while(cont<=8){
+		while(cont<=16){
 
 			//System.out.println(ModelsProvisioning.getCpuAvg()+" "+ModelsProvisioning.getCpuUSED()+" avg "+ModelsProvisioning.getCpuMax()*0.75);
 			Starter.model = new ModelsProvisioning();
-			timeTemp=Math.pow(10,regression.beta(0) + regression.beta(1)*Math.log10(Starter.transformationAgentQty)+regression.beta(2)*Math.log10(cont));
+			timeTemp=regression.beta(0) + regression.beta(1)*Starter.transformationAgentQty+regression.beta(2)*cont;
 
-			cpuTemp=((regression1.beta(0) + regression1.beta(1)*Math.log10(Starter.transformationAgentQty)+regression1.beta(2)*Math.log10(cont)<100)?regression1.beta(0) + regression1.beta(1)*Starter.transformationAgentQty+regression1.beta(2)*cont:99);
-			//System.out.println("CPUSSSSSS "+Math.pow(10,regression1.beta(0))+" " + regression1.beta(1)*Math.log10(Starter.transformationAgentQty)+" "+regression1.beta(2)*Math.log10(cont)+" "+Starter.transformationAgentQty);
-			//cpuTemp=Math.pow(10,regression1.beta(0) + regression1.beta(1)*Math.log10(Starter.transformationAgentQty)+regression1.beta(2)*Math.log10(cont));
-			cpuNoUsedTemp=Math.pow(10,regression2.beta(0) + regression2.beta(1)*Math.log10(Starter.transformationAgentQty)+regression2.beta(2)*Math.log10(cont));
-			memoryTemp=Math.pow(10,regression4.beta(0) + regression4.beta(1)*Math.log10(Starter.transformationAgentQty)+regression4.beta(2)*Math.log10(cont));
+			cpuTemp=((regression1.beta(0) + regression1.beta(1)*(Starter.transformationAgentQty)+regression1.beta(2)*(cont)<100)?regression1.beta(0) + regression1.beta(1)*Starter.transformationAgentQty+regression1.beta(2)*cont:99);
+			//System.out.println("CPUSSSSSS "+Math.pow(10,regression1.beta(0))+" " + regression1.beta(1)*(Starter.transformationAgentQty)+" "+regression1.beta(2)*(cont)+" "+Starter.transformationAgentQty);
+			//cpuTemp=Math.pow(10,regression1.beta(0) + regression1.beta(1)*(Starter.transformationAgentQty)+regression1.beta(2)*(cont));
+			cpuNoUsedTemp=regression2.beta(0) + regression2.beta(1)*Starter.transformationAgentQty+regression2.beta(2)*cont;
+			memoryTemp=regression4.beta(0) + regression4.beta(1)*Starter.transformationAgentQty+regression4.beta(2)*cont;
 			
 			t1=ModelsProvisioning.getCpuSum()+cpuTemp;
 			ModelsProvisioning.setCpuSum(t1);
@@ -294,6 +290,11 @@ public class MultipleLinearRegression  {
 			ModelsProvisioning m = (ModelsProvisioning) Starter.valuesCpus.get(i);
 			//System.out.println(m.getCpu()+" CPU "+ m.getCpuUSED()+" CPU Used "+m.getCpuMax()*0.6+" Time "+m.getTime());
 			
+			 System.out.println("Preco "+ModelsProvisioning.getPriceSelected() +" "+ (m.getPrice()+(m.getPrice()*Starter.priceVariable)));
+			 System.out.println("tempo "+ModelsProvisioning.getTimeSelected() +" "+ (m.getTime()+(m.getTime()*Starter.timeVariable)));
+			 System.out.println("cpu "+ModelsProvisioning.getCpuUsedSelected() +" "+ (m.getCpuUSED()+(m.getCpuUSED()*Starter.timeVariable)));
+			 System.out.println("memory "+ModelsProvisioning.getMemoryUSEDSelected() +" "+ (m.getMemoryUSED()+(m.getMemoryUSED()*Starter.cpuUsageVariable)));
+			        
 			
 			if(i==0){
 				Starter.model.setTimeSelected(Double.MAX_VALUE);
@@ -357,11 +358,7 @@ public class MultipleLinearRegression  {
 		for(int i=0; i<ModelsProvisioning.getCpusCandidatesSize();i++){
 			//System.out.println("CPU "+ModelsProvisioning.getCpusCandidates(i).getCpu()+" Tempo "+ModelsProvisioning.getCpusCandidates(i).getTime());
 			try {
-				double val = Starter.model.getCpusCandidates(i).getBalance()*1000;
-				val = (double)((int) val);
-				val = val /1000;
 				
-				    Starter.model.getCpusCandidates(i).setBalance(val);
 				
 				Starter.kSession.insert(i);
 				Starter.kSession.fireAllRules();

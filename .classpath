@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="con" path="DROOLS/Drools"/>
-	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="DROOLS/Drools"/>
+	<classpathentry kind="lib" path="C:/Users/aldoh/Documents/GitHub/MAS-Cloud/jade.jar"/>
 	<classpathentry kind="src" path="resources"/>
-	<classpathentry kind="lib" path="D:/Dropbox/workspace/ProjetoMestrado/Jama-1.0.1.jar"/>
-	<classpathentry kind="lib" path="D:/Dropbox/workspace/ProjetoMestrado/opencsv-3.8.jar"/>
-	<classpathentry kind="lib" path="D:/Dropbox/workspace/ProjetoMestrado/slf4j-simple-1.7.21.jar"/>
-	<classpathentry kind="lib" path="D:/Dropbox/workspace/JADE/jade/lib/jade.jar"/>
+	<classpathentry kind="lib" path="C:/Users/aldoh/Documents/GitHub/MAS-Cloud/Jama-1.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/aldoh/Documents/GitHub/MAS-Cloud/opencsv-3.8.jar"/>
+	<classpathentry kind="lib" path="C:/Users/aldoh/Documents/GitHub/MAS-Cloud/slf4j-simple-1.7.21.jar"/>
+	<classpathentry kind="lib" path="C:/Users/aldoh/Documents/GitHub/MAS-Cloud/drools-distribution-6.5.0.Final/kie-api.jar"/>
+	<classpathentry kind="lib" path="drools-distribution-6.5.0.Final"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
